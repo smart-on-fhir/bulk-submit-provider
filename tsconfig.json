@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "./",
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "types": ["node", "chai", "mocha", "./@types"],
+    "lib": ["ESNext", "DOM"]
+  },
+  "include": [
+    "src",
+    "test",
+    "frontend/src",
+    "@types"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "frontend/dist"
+  ]
+}

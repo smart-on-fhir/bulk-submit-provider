@@ -1,0 +1,74 @@
+:root {
+  color-scheme: light dark;
+}
+
+.form-control::placeholder {
+    opacity: 0.5;
+}
+
+.btn.disabled, .btn:disabled, fieldset:disabled .btn {
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-tertiary-color);
+    border-color: #8883;
+}
+
+.badge {
+    vertical-align: text-top;
+}
+
+pre:has(> code.language-json) {
+    background: var(--bs-body-bg) !important;
+}
+
+pre code.language-json {
+    white-space: pre-wrap !important;
+    background-color: transparent !important;
+    span { mix-blend-mode: exclusion; }
+    font-family: 'DejaVu Sans Mono', Hack, Menlo, Monaco, 'Courier New', monospace !important;
+    line-height: 1.2 !important;
+}
+
+.jobs-table-wrapper tbody tr td{
+    background: transparent;
+}
+
+.jobs-table-wrapper tbody tr:first-child td:first-child {
+    border-top-left-radius: var(--bs-border-radius-lg)!important;
+}
+.jobs-table-wrapper tbody tr:first-child td:last-child {
+    border-top-right-radius: var(--bs-border-radius-lg)!important;
+}
+.jobs-table-wrapper tbody tr:last-child td:first-child {
+    border-bottom-left-radius: var(--bs-border-radius-lg)!important;
+}
+.jobs-table-wrapper tbody tr:last-child td:last-child {
+    border-bottom-right-radius: var(--bs-border-radius-lg)!important;
+}
+.jobs-table-wrapper tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+/* collapse ----------------------------------------------------------------  */
+.vi-collapse .vi-collapse-header {
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+}
+.vi-collapse .vi-collapse-body {
+    transition: height 0.3s ease-in-out;
+    overflow: hidden;
+    height: 0;
+    padding-left: 1rem;
+    interpolate-size: allow-keywords;
+}
+.vi-collapse.show > .vi-collapse-body {
+    height: fit-content;
+    transition: height 0.3s ease-in-out;
+    overflow: auto;
+}

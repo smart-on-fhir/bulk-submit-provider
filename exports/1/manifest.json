@@ -1,0 +1,105 @@
+{
+    "transactionTime": "2025-02-12T08:55:48-05:00",
+    "requiresAccessToken": false,
+    "outputOrganizedBy": "",
+    "deleted": [],
+    "output": [
+        {
+            "url": "1.AllergyIntolerance.ndjson",
+            "count": 38,
+            "type": "AllergyIntolerance"
+        },
+        {
+            "url": "1.CarePlan.ndjson",
+            "count": 278,
+            "type": "CarePlan"
+        },
+        {
+            "url": "1.CareTeam.ndjson",
+            "count": 278,
+            "type": "CareTeam"
+        },
+        {
+            "url": "1.Claim.ndjson",
+            "count": 6083,
+            "type": "Claim"
+        },
+        {
+            "url": "1.Condition.ndjson",
+            "count": 639,
+            "type": "Condition"
+        },
+        {
+            "url": "1.Device.ndjson",
+            "count": 4,
+            "type": "Device"
+        },
+        {
+            "url": "1.DiagnosticReport.ndjson",
+            "count": 897,
+            "type": "DiagnosticReport"
+        },
+        {
+            "url": "1.DocumentReference.ndjson",
+            "count": 3,
+            "type": "DocumentReference"
+        },
+        {
+            "url": "1.Encounter.ndjson",
+            "count": 3697,
+            "type": "Encounter"
+        },
+        {
+            "url": "1.ExplanationOfBenefit.ndjson",
+            "count": 3697,
+            "type": "ExplanationOfBenefit"
+        },
+        {
+            "url": "1.ImagingStudy.ndjson",
+            "count": 16,
+            "type": "ImagingStudy"
+        },
+        {
+            "url": "1.Immunization.ndjson",
+            "count": 1287,
+            "type": "Immunization"
+        },
+        {
+            "url": "1.MedicationRequest.ndjson",
+            "count": 2386,
+            "type": "MedicationRequest"
+        },
+        {
+            "url": "1.Observation.ndjson",
+            "count": 10000,
+            "type": "Observation",
+            "continuesInFile": "29.Observation.ndjson"
+        },
+        {
+            "url": "2.Observation.ndjson",
+            "count": 6315,
+            "type": "Observation"
+        },
+        {
+            "url": "1.Organization.ndjson",
+            "count": 93,
+            "type": "Organization"
+        },
+        {
+            "url": "1.Patient.ndjson",
+            "count": 100,
+            "type": "Patient"
+        },
+        {
+            "url": "1.Practitioner.ndjson",
+            "count": 49,
+            "type": "Practitioner"
+        },
+        {
+            "url": "1.Procedure.ndjson",
+            "count": 2351,
+            "type": "Procedure"
+        }
+    ],
+    "error": []
+}

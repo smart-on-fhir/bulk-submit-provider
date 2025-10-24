@@ -1,0 +1,70 @@
+{
+  "name": "bulk-submit-provider",
+  "version": "0.1.0",
+  "description": "A minimal Data Provider for Bulk Submit (PoC) - TypeScript + Express",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "start": "ts-node --transpile-only src/index.ts",
+    "dev:frontend": "vite --config frontend/vite.config.ts",
+    "build:frontend": "vite build --config frontend/vite.config.ts",
+    "preview:frontend": "vite preview --config frontend/vite.config.ts",
+    "test": "mocha --no-warnings -r ts-node/register -r source-map-support/register --recursive \"test/**/*.spec.ts\"",
+    "test:fast": "mocha --no-warnings -r ts-node/register/transpile-only -r source-map-support/register --recursive \"test/**/*.spec.ts\"",
+    "test:ci": "npm run type-check && npm run test:fast",
+    "type-check": "tsc -p tsconfig.json --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smart-on-fhir/bulk-submit-provider.git"
+  },
+  "keywords": [
+    "fhir",
+    "bulk",
+    "provider",
+    "smart-on-fhir"
+  ],
+  "author": "Vladimir Ignatov <vlad.ignatov@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/smart-on-fhir/bulk-submit-provider/issues"
+  },
+  "homepage": "https://github.com/smart-on-fhir/bulk-submit-provider#readme",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/cors": "^2.8.19",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^4.17.21",
+    "@types/fhir": "^0.0.41",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^22.18.10",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/supertest": "^2.0.12",
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "chai": "^4.3.8",
+    "mocha": "^10.2.0",
+    "react-syntax-highlighter": "^15.5.0",
+    "source-map-support": "^0.5.21",
+    "supertest": "^6.3.3",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.6",
+    "vite": "^5.0.0"
+  }
+}
