@@ -1,14 +1,14 @@
 import 'dotenv/config';
-import db                 from './db';
-import createApp          from './app';
-import { BASE_URL, PORT } from './config';
-import Submission         from './Submission';
+import db                           from './db';
+import createApp                    from './app';
+import Submission                   from './Submission';
+import { BASE_URL, NODE_ENV, PORT } from './config';
 
 
 const app = createApp();
 
 // In DEV, create a default submission for convenience
-if (process.env.NODE_ENV !== 'production') {
+if (NODE_ENV !== 'production') {
     const defaultSubmission = new Submission({ destinationBaseUrl: 'http://localhost:3333', name: 'Example Bulk Submission' });
     (defaultSubmission as any).id = 'example-submission';
     defaultSubmission.addJob(`${BASE_URL}/api/manifests/1`, BASE_URL);
