@@ -383,7 +383,7 @@ export default class Submission
         if (res?.status === 202) {
             const progress = String(response?.headers['x-progress']).match(/(\d+(\.\d+)?)%/);
             if (progress && progress[1]) {
-                this.progress = parseFloat(progress[1]);
+                this.progress = Math.round(parseFloat(progress[1]));
             }
             this.poolTimer = setTimeout(() => this.checkStatus(statusUrl), 5_000);
         }
