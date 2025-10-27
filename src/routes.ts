@@ -3,7 +3,7 @@ import path                          from 'path';
 import Submission                    from './Submission';
 import db                            from './db';
 import { getErrorMessage }           from './utils';
-import { BASE_URL }                  from './config';
+import { BASE_URL, THROTTLE }        from './config';
 import {
     existsSync,
     readdirSync,
@@ -15,11 +15,13 @@ import {
 const router = Router();
 
 // artificial delay for dev purposes
-if (process.env.NODE_ENV !== 'production') {
-    router.use((req, res, next) => {
-        setTimeout(() => next(), 1000);
-    });
-}
+router.use((req, res, next) => {
+    if (THROTTLE > 0) {
+        setTimeout(() => next(), THROTTLE);
+    } else {
+        next();
+    }
+});
 
 // Submissions -----------------------------------------------------------------
 
