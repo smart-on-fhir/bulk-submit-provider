@@ -30,8 +30,22 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
                     </div>
                 </div>
                 <div className="mb-5">
-                    <label htmlFor="destinationBaseUrl" className="form-label text-primary-emphasis fw-semibold">Recipient Base URL</label>
-                    <input type="url" className="form-control" id="destinationBaseUrl" placeholder="https://destination.com/fhir" required value={destinationBaseUrl} onChange={e => setDestinationBaseUrl(e.target.value)} />
+                    <label htmlFor="destinationBaseUrl" className="form-label text-primary-emphasis fw-semibold lh-sm">
+                        Recipient Base URL
+                        { (value?.status === 'in-progress' || value?.status === 'complete') && <span className="small text-danger fw-normal ms-2">
+                            Cannot edit this while the submissions that are completed or in progress
+                        </span> }
+                    </label>
+                    <input
+                        type="url"
+                        className="form-control"
+                        id="destinationBaseUrl"
+                        placeholder="https://destination.com/fhir"
+                        required
+                        value={destinationBaseUrl}
+                        onChange={e => setDestinationBaseUrl(e.target.value)}
+                        disabled={loading || value?.status === 'in-progress'}
+                    />
                     <div className="small mt-1 text-secondary">
                         The base URL of the server where the data will be submitted.
                         It must support the bulk-submit operation at <code>POST [base-url]/$bulk-submit</code>,
@@ -39,13 +53,18 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
                     </div>
                 </div>
                 <div className="mb-2">
-                    <label htmlFor="submitter" className="form-label fw-semibold text-primary-emphasis">Submitter</label>
+                    <label htmlFor="submitter" className="form-label fw-semibold text-primary-emphasis lh-sm">
+                        Submitter
+                        { (value?.status === 'in-progress' || value?.status === 'complete') && <span className="small text-danger fw-normal ms-2">
+                            Cannot edit this while the submissions that are completed or in progress
+                        </span> }
+                    </label>
                     <textarea
                         className="form-control"
                         id="submitter"
                         value={submitter}
                         onChange={e => setSubmitter(e.target.value)}
-                        disabled={loading}
+                        disabled={loading || value?.status === 'in-progress'}
                         rows={4}
                         style={{ fontFamily: 'monospace', fontSize: '0.9em' }}
                     />
