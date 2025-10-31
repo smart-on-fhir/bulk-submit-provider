@@ -132,7 +132,7 @@ export default function ViewSession() {
     }, [id]);
 
     useEffect(() => {
-        const shouldPool = session && session.manifests.some(job => job.status === 'submitted');
+        const shouldPool = session && session.status === 'in-progress';
         if (shouldPool) {
             poolTimeout.current = setTimeout(() => fetchSession(), 5_000);
         } else {
@@ -186,15 +186,21 @@ export default function ViewSession() {
                                 <tr className='align-top'>
                                     <td className='text-end pe-2 text-muted fw-semibold'>Status:</td>
                                     <td className='align-middle'>
-                                        { session.status === 'in-progress' ?
-                                            session.progress > 0 ?
-                                                <div className="progress" role="progressbar" aria-valuenow={session.progress} aria-valuemin={0} aria-valuemax={100}>
-                                                    <div className="progress-bar" style={{ width: `${session.progress}%` }}>{session.progress}%</div>
-                                                </div> :
-                                                'In progress...' :
-                                            <code className='text-body'>{session.status}</code>
+                                        {
+                                            session.status === 'in-progress' ?
+                                            <div className="progress" role="progressbar" style={{ maxWidth: '20em' }}>
+                                                <div className="progress-bar small" style={{ width: `${session.progress || 0}%` }}>
+                                                    {session.progress || 0}%
+                                                </div>
+                                            </div> :
+                                            session.status === 'complete' ? (
+                                                <code className='text-body'>Completed<i className="bi bi-check-circle-fill text-success ms-2" /></code>
+                                            ) : session.status === 'failed' ? (
+                                                <code className='text-danger'>Failed<i className="bi bi-x-circle-fill text-danger ms-2" /></code>
+                                            ) : session.status === 'not-started' ? (
+                                                <code className='text-secondary'>Not Started<i className="bi bi-x-circle-fill text-secondary ms-2" /></code>
+                                            ) : null
                                         }
-
                                     </td>
                                 </tr>
                             </tbody>
@@ -260,7 +266,11 @@ export default function ViewSession() {
                                         { job.status === "failed"      && <span className="badge bg-danger rounded-pill">Failed</span>  }
                                         { job.status === "submitted"   && <span><i className="bi bi-check-circle-fill text-success me-2" />Submitted</span> }
                                         { job.status === "submitting"  && <span className='text-secondary'><span className="spinner-border spinner-border-sm me-2" role="status" />Working...</span> }
-                                        { job.status === "not-started" && <button className='btn btn-sm text-primary-emphasis border-0 p-0' onClick={() => submitJob(job)}><i className='bi bi-send me-2' />Submit</button> }
+                                        { job.status === "not-started" && (
+                                            <button className='btn btn-sm text-primary-emphasis border-0 p-0' onClick={() => submitJob(job)}>
+                                                <i className='bi bi-send me-2' />Submit
+                                            </button>
+                                        )}
                                     </td>
                                     <td className="text-nowrap pe-2" style={{ width: '2em' }}>
                                         <div className="dropend">
