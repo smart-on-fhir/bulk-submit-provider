@@ -11,6 +11,8 @@ export default function ViewSession() {
     const [session   , setSession   ] = useState<App.Submission | null>(null);
     const [loading   , setLoading   ] = useState(true);
     const [error     , setError     ] = useState<string | null>(null);
+    const [completing, setCompleting] = useState(false);
+    const [completed , setCompleted ] = useState(false);
 
     async function fetchSession(): Promise<App.Submission | null> {
         setLoading(true);
@@ -110,14 +112,17 @@ export default function ViewSession() {
     const completeSubmission = async () => {
         if (!session) return;
         setLoading(true);
+        setCompleting(true);
         const response = await fetch(`/api/sessions/${session.id}/complete`, { method: 'POST' });
         setLoading(false);
         if (response.ok) {
             const data = await response.json();
             setSession(data);
+            setCompleted(true);
         } else {
             alert('Failed to finalize submission. Please try again later.');
         }
+        setCompleting(false);
     };
 
     const poolTimeout = React.useRef<NodeJS.Timeout | null>(null);
@@ -207,8 +212,11 @@ export default function ViewSession() {
                             className='btn btn-sm btn-outline-secondary px-3 d-block w-100 mt-2'
                             type="button"
                             onClick={completeSubmission}
-                            disabled={session.status === 'completed' || session.status === 'unknown'}
-                        >Complete</button>
+                            disabled={completing || completed || session.status === 'complete' || session.status === 'failed' || session.status === 'not-started'}
+                        >
+                            { completing && <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" /> }
+                            Complete
+                        </button>
                     </div>
                 </div>
             </div>
