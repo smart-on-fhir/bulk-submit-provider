@@ -32,11 +32,18 @@ declare global {
             name: string;
             destinationBaseUrl: string;
             createdAt: string;
-            status: string;
+            status: 'not-started' | 'complete' | 'in-progress' | 'failed';
             submitter: Submitter;
             progress: number;
             log: JobLogEntry[];
             manifests: SubmissionManifest[];
+            result: null | {
+                startedAt  : string
+                completedAt: string
+                duration   : string
+                totalErrors: number
+                manifest   : any
+            }
         }
 
         interface SubmissionManifest {

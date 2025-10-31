@@ -165,7 +165,7 @@ export default function ViewSession() {
             <div className="text-secondary rounded-3 p-4 bg-body-secondary bg-opacity-50 mb-4">
                 <div className='row g-3'>
                     <div className='col'>
-                        <table className="text-secondary">
+                        <table className="text-secondary lh-sm">
                             <tbody>
                                 <tr>
                                     <td className='text-end pe-2 text-muted fw-semibold'>Data&nbsp;Recipient:</td>
@@ -188,21 +188,55 @@ export default function ViewSession() {
                                     <td className='align-middle'>
                                         {
                                             session.status === 'in-progress' ?
-                                            <div className="progress" role="progressbar" style={{ maxWidth: '20em' }}>
-                                                <div className="progress-bar small" style={{ width: `${session.progress || 0}%` }}>
-                                                    {session.progress || 0}%
-                                                </div>
+                                            <div className="progress" role="progressbar" style={{ maxWidth: '20em', boxShadow: '0 0 0 1px rgba(0,0,0,0.2) inset', borderRadius: '0.25rem' }}>
+                                                <div className="progress-bar opacity-75 small" style={{ width: `${session.progress || 0}%`, transition: 'all 3s linear' }} />
                                             </div> :
                                             session.status === 'complete' ? (
-                                                <code className='text-body'>Completed<i className="bi bi-check-circle-fill text-success ms-2" /></code>
+                                                <b className='text-body'>Completed<i className="bi bi-check-circle-fill text-success ms-2" /></b>
                                             ) : session.status === 'failed' ? (
-                                                <code className='text-danger'>Failed<i className="bi bi-x-circle-fill text-danger ms-2" /></code>
+                                                <b className='text-danger'>Failed<i className="bi bi-x-circle-fill text-danger ms-2" /></b>
                                             ) : session.status === 'not-started' ? (
-                                                <code className='text-secondary'>Not Started<i className="bi bi-x-circle-fill text-secondary ms-2" /></code>
+                                                <span className='text-secondary'>Not Started</span>
                                             ) : null
                                         }
                                     </td>
                                 </tr>
+                                { session.result && (<>
+                                    <tr>
+                                        <td className='text-end pe-2 text-muted fw-semibold'>Started:</td>
+                                        <td><code className='text-body'>{new Date(session.result.startedAt).toLocaleString()}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td className='text-end pe-2 text-muted fw-semibold'>Completed:</td>
+                                        <td><code className='text-body'>{new Date(session.result.completedAt).toLocaleString()}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td className='text-end pe-2 text-muted fw-semibold'>Duration:</td>
+                                        <td><code className='text-body'>{session.result.duration}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td className='text-end pe-2 text-muted fw-semibold'>Total Errors:</td>
+                                        <td>{
+                                            session.result.totalErrors < 1 ?
+                                            <code className='text-muted'>{session.result.totalErrors}</code> :
+                                            <code className='badge bg-danger rounded-pill'>{session.result.totalErrors}</code>
+                                        }</td>
+                                    </tr>
+                                    { session.result.manifest.error.length > 0 && (
+                                        <tr>
+                                            <td className='text-end align-top pe-2 text-muted fw-semibold'>Error Outcomes:</td>
+                                            <td>
+                                                <ul className='list-unstyled mb-0 small'>
+                                                    {session.result.manifest.error.map((error: any, index: number) => (
+                                                        <li key={index}>
+                                                            <a href={error.url} target='_blank' rel='noopener noreferrer'>{error.url.split('/').pop()}</a>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </>)}
                             </tbody>
                         </table>
                     </div>
@@ -267,7 +301,11 @@ export default function ViewSession() {
                                         { job.status === "submitted"   && <span><i className="bi bi-check-circle-fill text-success me-2" />Submitted</span> }
                                         { job.status === "submitting"  && <span className='text-secondary'><span className="spinner-border spinner-border-sm me-2" role="status" />Working...</span> }
                                         { job.status === "not-started" && (
-                                            <button className='btn btn-sm text-primary-emphasis border-0 p-0' onClick={() => submitJob(job)}>
+                                            <button
+                                                className='btn btn-sm text-primary-emphasis border-0 p-0 bg-transparent'
+                                                onClick={() => submitJob(job)}
+                                                disabled={ completed || completing || session.status === 'complete' }
+                                            >
                                                 <i className='bi bi-send me-2' />Submit
                                             </button>
                                         )}

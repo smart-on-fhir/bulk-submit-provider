@@ -2,7 +2,7 @@ import { v4 as uuidV4 }                    from 'uuid';
 import { Parameters, ParametersParameter } from 'fhir/r4';
 import db                                  from './db';
 import { Log }                             from './Log';
-import { sendRequest }                     from './utils';
+import { formatDuration, sendRequest }     from './utils';
 import {
     BASE_URL,
     CODING_ABORTED,
@@ -32,7 +32,14 @@ export default class Submission
     /**
      * The time at which the submission was created
      */
-    public readonly createdAt: string = new Date().toISOString();
+    public readonly createdAt: Date = new Date();
+
+    /**
+     * The time at which the submission was started (the first manifest was sent)
+     */
+    public startedAt: Date | null = null;
+
+    public completedAt: Date | null = null;
 
     /**
      * The identifier of the system. Note that we have a default value here
@@ -70,7 +77,7 @@ export default class Submission
         this.log = new Log();
     }
 
-    get status(): string {
+    get status(): App.Submission['status'] {
         if (this.resultManifest) {
             return 'complete';
         }
@@ -86,17 +93,32 @@ export default class Submission
         return 'not-started';
     }
 
+    get statusDetails(): any {
+        if (this.status !== 'complete') {
+            return null;
+        }
+
+        return {
+            startedAt  : this.startedAt,
+            completedAt: this.completedAt,
+            duration   : formatDuration(this.completedAt!.getTime() - this.startedAt!.getTime()),
+            totalErrors: this.resultManifest!.error.reduce((acc: number, entry: any) => acc + (entry.extension?.countSeverity?.error || 0), 0),
+            manifest   : this.resultManifest
+        };
+    }
+
     toJSON(): App.Submission {
         return {
             id                : this.id,
             name              : this.name,
-            createdAt         : this.createdAt,
+            createdAt         : this.createdAt.toISOString(),
             destinationBaseUrl: this.destinationBaseUrl,
             submitter         : this.submitter,
             status            : this.status,
             progress          : this.progress,
             manifests         : this.manifests,
             log               : this.log.toJSON(),
+            result            : this.statusDetails
         };
     }
 
@@ -273,6 +295,9 @@ export default class Submission
 
         if (!error) {
             manifest.status = 'submitted';
+            if (!this.startedAt) {
+                this.startedAt = new Date();
+            }
             await this.kickoffStatusPolling();
         }
 
@@ -390,6 +415,7 @@ export default class Submission
 
         if (res?.status === 200) {
             this.resultManifest = response?.body as App.ResultManifest;
+            this.completedAt = new Date();
         }
 
         return this;
