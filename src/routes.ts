@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import cookieParser                  from 'cookie-parser';
 import path                          from 'path';
 import Submission                    from './Submission';
 import db                            from './db';
@@ -13,6 +14,7 @@ import {
 
 
 const router = Router();
+router.use(cookieParser());
 
 // artificial delay for dev purposes
 router.use((req, res, next) => {
@@ -21,6 +23,14 @@ router.use((req, res, next) => {
     } else {
         next();
     }
+});
+
+router.use((req, res, next) => {
+    const sessionId = req.cookies?.['bulkSubmitProviderSessionId'];
+    if (sessionId) {
+        res.locals.sessionId = sessionId;
+    }
+    next();
 });
 
 // Submissions -----------------------------------------------------------------

@@ -15,6 +15,17 @@ setBootstrapTheme();
 // Listen for changes in the OS theme preference
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setBootstrapTheme);
 
+// Automatic session per device ------------------------------------------------
+const sessionId = document.cookie
+  .split('; ')
+  .find(row => row.startsWith('bulkSubmitProviderSessionId='))
+  ?.split('=')[1];
+if (!sessionId) {
+  const newSessionId = crypto.randomUUID();
+  document.cookie = `bulkSubmitProviderSessionId=${newSessionId}; path=/; SameSite=Lax`;
+}
+// -----------------------------------------------------------------------------
+
 const root = createRoot(document.getElementById('root')!);
 root.render(
   // <React.StrictMode>
