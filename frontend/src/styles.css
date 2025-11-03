@@ -72,3 +72,10 @@ pre code.language-json {
     transition: height 0.3s ease-in-out;
     overflow: auto;
 }
+.vi-collapse > .vi-collapse-header > .bi.bi-caret-right-fill {
+    transition: transform 0.3s ease-in-out;
+    transform: rotate(0deg);
+}
+.vi-collapse.show > .vi-collapse-header > .bi.bi-caret-right-fill {
+    transform: rotate(90deg);
+}

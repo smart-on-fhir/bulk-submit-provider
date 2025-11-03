@@ -2,6 +2,7 @@ import React, { useState, useEffect }   from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Prism as SyntaxHighlighter }   from 'react-syntax-highlighter';
 import { atomDark }                     from 'react-syntax-highlighter/dist/esm/styles/prism';
+import Collapse                         from '../Collapse';
 
 
 export default function ViewSession() {
@@ -594,29 +595,3 @@ function SourceDialog({
     );
 }
 
-function Collapse({ header, children, open = false }: { header: React.ReactNode, children: React.ReactNode, open?: boolean }) {
-
-    const [isOpen, setIsOpen] = useState(open);
-
-    useEffect(() => {
-        setIsOpen(open);
-    }, [open]);
-
-    function toggle() {
-        setIsOpen(!isOpen);
-    }
-
-    return (
-        <div className={`vi-collapse ${isOpen ? 'show' : ''}`}>
-            <div className="vi-collapse-header" onClick={toggle}>
-                { !!children ?
-                    <i className='bi bi-caret-right-fill me-2 small text-muted' style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} /> :
-                    <i className='bi bi-dash me-2 small text-muted' /> }
-                {header}
-            </div>
-            <div className="vi-collapse-body">
-                {children}
-            </div>
-        </div>
-    )
-}
