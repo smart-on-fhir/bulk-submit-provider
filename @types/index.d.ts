@@ -29,6 +29,7 @@ declare global {
 
         interface Submission {
             id: string;
+            owner_id?: string;
             name: string;
             destinationBaseUrl: string;
             createdAt: string;

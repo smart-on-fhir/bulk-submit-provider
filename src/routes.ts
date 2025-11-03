@@ -38,7 +38,11 @@ router.use((req, res, next) => {
 // Get all Submissions
 router.get('/api/sessions', (req: Request, res: Response) => {
     const sessions = Array.from(db.sessions.values());
-    res.json(sessions);
+    res.json(sessions.filter(session => {
+        const sessionId = res.locals.sessionId;
+        if (!sessionId) return true;
+        return !session.owner_id || session.owner_id === sessionId;
+    }));
 });
 
 // Create new Submission
@@ -47,7 +51,12 @@ router.post('/api/sessions', (req: Request, res: Response) => {
     if (!destinationBaseUrl) {
         return res.status(400).json({ error: 'Missing destinationBaseUrl' });
     }
-    const session = new Submission({ destinationBaseUrl, name, submitter }).save();
+    const session = new Submission({
+        destinationBaseUrl,
+        name,
+        submitter,
+        owner_id: res.locals.sessionId
+    }).save();
     res.status(201).json(session);
 });
 
@@ -61,6 +70,9 @@ router.put('/api/sessions/:id', (req: Request, res: Response) => {
     const session = db.sessions.get(id);
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
+    }
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
     }
     session.destinationBaseUrl = destinationBaseUrl;
     session.submitter = submitter;
@@ -76,6 +88,9 @@ router.get('/api/sessions/:id', (req: Request, res: Response) => {
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
     }
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
+    }
     res.json(session);
 });
 
@@ -85,6 +100,9 @@ router.delete('/api/sessions/:id', (req: Request, res: Response) => {
     const session = db.sessions.get(id);
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
+    }
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
     }
     db.sessions.delete(id);
     res.status(204).send();
@@ -97,6 +115,10 @@ router.post('/api/sessions/:id/complete', async (req: Request, res: Response) =>
     const session = db.sessions.get(id);
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
     }
 
     try {
@@ -122,6 +144,11 @@ router.post('/api/sessions/:id/manifests', (req: Request, res: Response) => {
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
     }
+
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
+    }
+
     session.addJob(manifestUrl, FHIRBaseUrl);
     session.save();
     res.json(session);
@@ -143,6 +170,11 @@ router.put('/api/sessions/:id/manifests/:index', (req: Request, res: Response) =
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
     }
+
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
+    }
+
     const manifest = session.manifests[+index];
     if (!manifest) {
         return res.status(404).json({ error: 'Manifest not found' });
@@ -161,6 +193,11 @@ router.delete('/api/sessions/:id/manifests/:index', (req: Request, res: Response
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
     }
+
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
+    }
+
     session.removeManifestAt(+index);
     session.save();
     res.json(session);
@@ -178,6 +215,10 @@ router.post('/api/sessions/:id/manifests/:index/replace', async (req: Request, r
     const session = db.sessions.get(id);
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
     }
 
     try {
@@ -199,6 +240,10 @@ router.post('/api/sessions/:id/manifests/:index/abort', async (req: Request, res
     const session = db.sessions.get(id);
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
     }
 
     try {
@@ -226,6 +271,10 @@ router.post('/api/sessions/:id/submit-manifest', async (req: Request, res: Respo
     const session = db.sessions.get(id);
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
     }
     
     try {
@@ -315,6 +364,14 @@ router.get('/api/manifests/:id', (req: Request, res: Response) => {
 function countLinesInFile(filePath: string): number {
     const data = readFileSync(filePath, 'utf-8');
     return data.split('\n').length;
+}
+
+function checkSubmissionOwnership(session: Submission, res: Response): boolean {
+    if (session.owner_id && session.owner_id !== res.locals.sessionId) {
+        res.status(403).json({ error: 'Forbidden' });
+        return false;
+    }
+    return true;
 }
 
 export default router;

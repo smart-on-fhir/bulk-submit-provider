@@ -19,6 +19,8 @@ export default class Submission
      */
     public readonly id: string;
 
+    public readonly owner_id?: string;
+
     /**
      * Name the submission (for user convenience)
      */
@@ -65,7 +67,7 @@ export default class Submission
 
     private progress: number = 0;
 
-    public constructor({ destinationBaseUrl, name, submitter } : { destinationBaseUrl: string, name?: string, submitter?: App.Submitter }) {
+    public constructor({ destinationBaseUrl, name, submitter, owner_id } : { destinationBaseUrl: string, name?: string, submitter?: App.Submitter, owner_id?: string }) {
         this.id = uuidV4();
         this.destinationBaseUrl = destinationBaseUrl;
         if (name) {
@@ -73,6 +75,9 @@ export default class Submission
         }
         if (submitter) {
             this.submitter = submitter;
+        }
+        if (owner_id) {
+            this.owner_id = owner_id;
         }
         this.log = new Log();
     }
