@@ -182,7 +182,7 @@ export default class Submission
     /**
      * Replace a manifest in the submission with a new one
      */
-    async replaceManifest(manifest: App.SubmissionManifest, newManifest: App.SubmissionManifest) {
+    async replaceManifest(manifest: App.SubmissionManifest, newManifest: { manifestUrl: string, FHIRBaseUrl: string }) {
         this.log.add(`Replacing manifest ${JSON.stringify(manifest.manifestUrl)} with ${JSON.stringify(newManifest.manifestUrl)}...`);
         const { error } = await this.bulkSubmitRequest([
             { name: 'submissionStatus', valueCoding: CODING_IN_PROGRESS },
@@ -196,17 +196,21 @@ export default class Submission
             await this.kickoffStatusPolling();
         }
 
+        this.addJob(newManifest.manifestUrl, newManifest.FHIRBaseUrl);
+        this.save();
+
         return this;
     }
 
     /**
      * Replace a manifest in the submission by its index with a new one
      */
-    async replaceManifestAt(index: number, newManifest: App.SubmissionManifest) {
+    async replaceManifestAt(index: number, newManifest: { manifestUrl: string, FHIRBaseUrl: string }) {
         const manifest = this.manifests[index];
         if (!manifest) {
             throw new Error(`Manifest at index ${index} not found in this submission`);
         }
+        console.log(`replacing manifest at index ${index} in submission ${this.id} with new URL: ${newManifest.manifestUrl}`);
         return this.replaceManifest(manifest, newManifest);
     }
 
@@ -390,7 +394,8 @@ export default class Submission
 
     async checkStatus(statusUrl: string) {
         if (this.status !== 'in-progress') {
-            throw new Error('Can only check status of submissions with status in-progress');
+            this.log.add(`Warning: Trying to check status of submissions with status ${this.status}`);
+            return this;
         }
 
         const { res, response, request, error } = await sendRequest(statusUrl)

@@ -206,7 +206,7 @@ router.delete('/api/sessions/:id/manifests/:index', (req: Request, res: Response
 // Replace manifest
 router.post('/api/sessions/:id/manifests/:index/replace', async (req: Request, res: Response) => {
     const { id, index } = req.params;
-    const { newManifestUrl } = req.body;
+    const { newManifestUrl, FHIRBaseUrl } = req.body;
 
     if (!newManifestUrl) {
         return res.status(400).json({ error: 'Missing newManifestUrl parameter' });
@@ -222,7 +222,7 @@ router.post('/api/sessions/:id/manifests/:index/replace', async (req: Request, r
     }
 
     try {
-        await session.replaceManifestAt(+index, newManifestUrl);
+        await session.replaceManifestAt(+index, { FHIRBaseUrl, manifestUrl: newManifestUrl });
         // session.save();
         // res.json(session);
     } catch (error) {
