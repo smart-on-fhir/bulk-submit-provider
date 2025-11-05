@@ -315,36 +315,37 @@ export default function ViewSession() {
                                             </button>
                                         )}
                                     </td>
-                                    <td className="text-nowrap pe-2" style={{ width: '2em' }}>
-                                        <div className="dropend">
-                                            <button type="button" className="btn btn-sm btn-outline-secondary border-0 px-2" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i className='bi bi-three-dots-vertical' />
-                                            </button>
-                                            <ul className="dropdown-menu shadow p-1">
-                                                
-                                                <button
-                                                    className="dropdown-item ps-2 rounded-1"
-                                                    disabled={!['failed', 'aborted', 'completed'].includes(job.status)}
-                                                    onClick={() => submitJob(job)}>
-                                                    <i className='bi bi-arrow-clockwise me-3'/>
-                                                    Retry
+                                    { session.status !== 'complete' && (
+                                        <td className="text-nowrap pe-2" style={{ width: '2em' }}>
+                                            <div className="dropend">
+                                                <button type="button" className="btn btn-sm btn-outline-secondary border-0 px-2" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i className='bi bi-three-dots-vertical' />
                                                 </button>
-                                                
-                                                <button
-                                                    className="dropdown-item ps-2 rounded-1"
-                                                    disabled={!['not-started', 'aborted', 'failed'].includes(job.status)}
-                                                    onClick={() => setShowDialog(index)}>
-                                                    <i className="bi bi-pencil-square me-3"/>
-                                                    Edit
-                                                </button>
-                                                
-                                                <button
-                                                    className="dropdown-item ps-2 rounded-1"
-                                                    disabled={!['not-started', 'aborted', 'failed'].includes(job.status)}
-                                                    onClick={() => removeManifestAt(index)}>
-                                                    <i className="bi bi-trash me-3"/>
-                                                    Remove
-                                                </button>
+                                                <ul className="dropdown-menu shadow p-1">
+                                                    
+                                                    <button
+                                                        className="dropdown-item ps-2 rounded-1"
+                                                        disabled={!['failed', 'aborted', 'completed'].includes(job.status)}
+                                                        onClick={() => submitJob(job)}>
+                                                        <i className='bi bi-arrow-clockwise me-3'/>
+                                                        Retry
+                                                    </button>
+                                                    
+                                                    <button
+                                                        className="dropdown-item ps-2 rounded-1"
+                                                        disabled={!['not-started', 'aborted', 'failed'].includes(job.status)}
+                                                        onClick={() => setShowDialog(index)}>
+                                                        <i className="bi bi-pencil-square me-3"/>
+                                                        Edit
+                                                    </button>
+                                                    
+                                                    <button
+                                                        className="dropdown-item ps-2 rounded-1"
+                                                        disabled={!['not-started', 'aborted', 'failed'].includes(job.status)}
+                                                        onClick={() => removeManifestAt(index)}>
+                                                        <i className="bi bi-trash me-3"/>
+                                                        Remove
+                                                    </button>
 
                                                     {/* <button
                                                         className="dropdown-item ps-2 rounded-1"
@@ -362,6 +363,10 @@ export default function ViewSession() {
                                                         <i className='bi bi-shuffle me-3'/>
                                                         Replace
                                                     </button>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    ) }
                                 </tr>
                             ))}
                         </tbody>
