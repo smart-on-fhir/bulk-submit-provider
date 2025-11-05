@@ -89,26 +89,26 @@ export default function ViewSession() {
         }
     }
 
-    const abortJobAt = async (index: number) => {
-        const job = session!.manifests[index];
-        if (!job) return;
-        const oldStatus = job!.status;
-        setSession({
-            ...session!,
-            manifests: session!.manifests.map((m, i) => i === index ? { ...m, status: 'submitting' } : m)
-        });
-        const response = await fetch(`/api/sessions/${session!.id}/manifests/${index}/abort`, { method: 'POST' });
-        if (response.ok) {
-            const data = await response.json();
-            setSession(data);
-        } else {
-            alert('Failed to abort job. Please try again later.');
-            setSession({
-                ...session!,
-                manifests: session!.manifests.map((m, i) => i === index ? { ...m, status: oldStatus } : m)
-            });
-        }
-    };
+    // const abortJobAt = async (index: number) => {
+    //     const job = session!.manifests[index];
+    //     if (!job) return;
+    //     const oldStatus = job!.status;
+    //     setSession({
+    //         ...session!,
+    //         manifests: session!.manifests.map((m, i) => i === index ? { ...m, status: 'submitting' } : m)
+    //     });
+    //     const response = await fetch(`/api/sessions/${session!.id}/manifests/${index}/abort`, { method: 'POST' });
+    //     if (response.ok) {
+    //         const data = await response.json();
+    //         setSession(data);
+    //     } else {
+    //         alert('Failed to abort job. Please try again later.');
+    //         setSession({
+    //             ...session!,
+    //             manifests: session!.manifests.map((m, i) => i === index ? { ...m, status: oldStatus } : m)
+    //         });
+    //     }
+    // };
 
     // Finalize submission by updating the session submissionStatus to 'complete'
     const completeSubmission = async () => {
@@ -343,14 +343,14 @@ export default function ViewSession() {
                                                     Remove
                                                 </button>
 
-                                                <button
-                                                    className="dropdown-item ps-2 rounded-1"
-                                                    disabled={!['submitting', 'submitted'].includes(job.status)}
-                                                    onClick={() => abortJobAt(index)}
-                                                    title="Aborting a job works by sending an empty manifest to replace the current one">
-                                                    <i className='bi bi-x-circle me-3'/>
-                                                    Abort
-                                                </button>
+                                                    {/* <button
+                                                        className="dropdown-item ps-2 rounded-1"
+                                                        disabled={session.status !== 'in-progress' || !['submitting', 'submitted'].includes(job.status)}
+                                                        onClick={() => abortJobAt(index)}
+                                                        title="Aborting a job works by sending an empty manifest to replace the current one">
+                                                        <i className='bi bi-x-circle me-3'/>
+                                                        Abort
+                                                    </button> */}
 
                                                 <button
                                                     className="dropdown-item ps-2 rounded-1"
