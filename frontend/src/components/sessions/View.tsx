@@ -4,17 +4,19 @@ import { Prism as SyntaxHighlighter }   from 'react-syntax-highlighter';
 import { atomDark }                     from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Collapse                         from '../Collapse';
 import ManifestFormDialog               from '../ManifestFormDialog';
+import ManifestReplaceDialog            from '../ManifestReplaceDialog';
 
 
 export default function ViewSession() {
-    const { id }                      = useParams();
-    const navigate                    = useNavigate();
-    const [showDialog, setShowDialog] = useState<boolean | number>(false);
-    const [session   , setSession   ] = useState<App.Submission | null>(null);
-    const [loading   , setLoading   ] = useState(true);
-    const [error     , setError     ] = useState<string | null>(null);
-    const [completing, setCompleting] = useState(false);
-    const [completed , setCompleted ] = useState(false);
+    const { id }                                    = useParams();
+    const navigate                                  = useNavigate();
+    const [showDialog       , setShowDialog       ] = useState<boolean | number>(false);
+    const [session          , setSession          ] = useState<App.Submission | null>(null);
+    const [loading          , setLoading          ] = useState(true);
+    const [error            , setError            ] = useState<string | null>(null);
+    const [completing       , setCompleting       ] = useState(false);
+    const [completed        , setCompleted        ] = useState(false);
+    const [showReplaceDialog, setShowReplaceDialog] = useState<number>(-1);
 
     async function fetchSession(): Promise<App.Submission | null> {
         setLoading(true);
@@ -353,15 +355,13 @@ export default function ViewSession() {
                                                         Abort
                                                     </button> */}
 
-                                                <button
-                                                    className="dropdown-item ps-2 rounded-1"
-                                                    disabled={!['submitted', 'failed'].includes(job.status)}>
-                                                    <i className='bi bi-shuffle me-3'/>
-                                                    Replace
-                                                </button>
-                                            </ul>
-                                        </div>
-                                    </td>
+                                                    <button
+                                                        className="dropdown-item ps-2 rounded-1"
+                                                        disabled={!['submitted', 'failed'].includes(job.status)}
+                                                        onClick={() => setShowReplaceDialog(index)}>
+                                                        <i className='bi bi-shuffle me-3'/>
+                                                        Replace
+                                                    </button>
                                 </tr>
                             ))}
                         </tbody>
@@ -417,8 +417,15 @@ export default function ViewSession() {
                     if (s) setSession(s);
                     setShowDialog(false)
                 }
-             } />)}
-            
+            } />)}
+
+            {showReplaceDialog > -1 && (
+                <ManifestReplaceDialog session={session} manifestIndex={ showReplaceDialog } close={(s?: App.Submission) => {
+                    if (s) setSession(s);
+                    setShowReplaceDialog(-1)
+                }} />
+            )}
+
         </div>
     );
 }
