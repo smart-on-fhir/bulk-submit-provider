@@ -301,6 +301,7 @@ export default function ViewSession() {
                                         { job.status === "aborted"     && <span className="badge bg-danger rounded-pill">Aborted</span> }
                                         { job.status === "failed"      && <span className="badge bg-danger rounded-pill">Failed</span>  }
                                         { job.status === "submitted"   && <span><i className="bi bi-check-circle-fill text-success me-2" />Submitted</span> }
+                                        { job.status === "replaced"    && <span className="badge bg-warning text-dark rounded-pill">Replaced</span> }
                                         { job.status === "submitting"  && <span className='text-secondary'><span className="spinner-border spinner-border-sm me-2" role="status" />Working...</span> }
                                         { job.status === "not-started" && (
                                             <button
