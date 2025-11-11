@@ -108,7 +108,7 @@ router.delete('/api/sessions/:id', (req: Request, res: Response) => {
     res.status(204).send();
 });
 
-// Complete session
+// Complete Submission by ID
 router.post('/api/sessions/:id/complete', async (req: Request, res: Response) => {
     const { id } = req.params;
 
@@ -163,9 +163,7 @@ router.put('/api/sessions/:id/manifests/:index', (req: Request, res: Response) =
         outputFormat,
         FHIRBaseUrl
     } = req.body;
-    // if (!outputFormat) {
-    //     return res.status(400).json({ error: 'Missing outputFormat' });
-    // }
+
     const session: Submission | undefined = db.sessions.get(id);
     if (!session) {
         return res.status(404).json({ error: 'Submission not found' });
