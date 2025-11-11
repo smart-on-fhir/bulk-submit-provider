@@ -194,14 +194,28 @@ export default class Submission
     /**
      * Replace a manifest in the submission with a new one
      */
-    async replaceManifest(manifest: App.SubmissionManifest, newManifest: { manifestUrl: string, FHIRBaseUrl: string }) {
-        this.log.add(`Replacing manifest ${JSON.stringify(manifest.manifestUrl)} with ${JSON.stringify(newManifest.manifestUrl)}...`);
-        const { error } = await this.bulkSubmitRequest([
+    async replaceManifest(manifest: App.SubmissionManifest, newManifest: {
+        manifestUrl: string,
+        FHIRBaseUrl: string,
+        outputFormat?: string,
+        fileRequestHeaders?: App.HeaderDescriptor[]
+    }) {
+        this.log.add(
+            `Replacing manifest ${JSON.stringify(manifest.manifestUrl)} with ${
+            JSON.stringify(newManifest.manifestUrl)}...`
+        );
+
+        const parameters: ParametersParameter[] = [
             { name: 'submissionStatus', valueCoding: CODING_IN_PROGRESS },
             { name: 'manifestUrl', valueString: newManifest.manifestUrl },
             { name: 'FHIRBaseUrl', valueString: newManifest.FHIRBaseUrl },
             { name: 'replacesManifestUrl', valueString: manifest.manifestUrl }
-        ]);
+        ];
+
+        if (newManifest.outputFormat) {
+            parameters.push({ name: 'outputFormat', valueString: newManifest.outputFormat });
+        }
+        const { error } = await this.bulkSubmitRequest(parameters);
 
         if (!error) {
             manifest.status = 'replaced';
@@ -221,7 +235,12 @@ export default class Submission
     /**
      * Replace a manifest in the submission by its index with a new one
      */
-    async replaceManifestAt(index: number, newManifest: { manifestUrl: string, FHIRBaseUrl: string }) {
+    async replaceManifestAt(index: number, newManifest: {
+        manifestUrl: string,
+        FHIRBaseUrl: string,
+        outputFormat?: string,
+        fileRequestHeaders?: App.HeaderDescriptor[]
+    }) {
         const manifest = this.manifests[index];
         if (!manifest) {
             throw new Error(`Manifest at index ${index} not found in this submission`);
@@ -312,11 +331,18 @@ export default class Submission
             throw new Error(`Manifest with URL ${JSON.stringify(manifestUrl)} not found in this submission`);
         }
 
-        const { error } = await this.bulkSubmitRequest([
+        const parameters: ParametersParameter[] = [
             { name: 'submissionStatus', valueCoding: CODING_IN_PROGRESS },
             { name: 'manifestUrl', valueString: manifestUrl },
-            { name: 'FHIRBaseUrl', valueString: manifest.FHIRBaseUrl }
-        ]);
+            { name: 'FHIRBaseUrl', valueString: manifest.FHIRBaseUrl },
+        ];
+
+        if (manifest.outputFormat) {
+            parameters.push({ name: 'outputFormat', valueString: manifest.outputFormat });
+        }
+
+
+        const { error } = await this.bulkSubmitRequest(parameters);
 
         if (!error) {
             manifest.status = 'submitted';

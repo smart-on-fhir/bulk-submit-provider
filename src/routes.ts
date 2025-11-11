@@ -177,9 +177,9 @@ router.put('/api/sessions/:id/manifests/:index', (req: Request, res: Response) =
     if (!manifest) {
         return res.status(404).json({ error: 'Manifest not found' });
     }
-    if (manifestUrl) manifest.manifestUrl = manifestUrl;
-    if (FHIRBaseUrl) manifest.FHIRBaseUrl = FHIRBaseUrl;
-    // if (outputFormat) job.outputFormat = outputFormat;
+    if (manifestUrl)        manifest.manifestUrl        = manifestUrl;
+    if (FHIRBaseUrl)        manifest.FHIRBaseUrl        = FHIRBaseUrl;
+    if (outputFormat)       manifest.outputFormat       = outputFormat;
     session.save();
     res.json(session);
 });
@@ -204,7 +204,7 @@ router.delete('/api/sessions/:id/manifests/:index', (req: Request, res: Response
 // Replace manifest
 router.post('/api/sessions/:id/manifests/:index/replace', async (req: Request, res: Response) => {
     const { id, index } = req.params;
-    const { newManifestUrl, FHIRBaseUrl } = req.body;
+    const { newManifestUrl, FHIRBaseUrl, outputFormat, fileRequestHeaders } = req.body;
 
     if (!newManifestUrl) {
         return res.status(400).json({ error: 'Missing newManifestUrl parameter' });
@@ -220,7 +220,12 @@ router.post('/api/sessions/:id/manifests/:index/replace', async (req: Request, r
     }
 
     try {
-        await session.replaceManifestAt(+index, { FHIRBaseUrl, manifestUrl: newManifestUrl });
+        await session.replaceManifestAt(+index, {
+            FHIRBaseUrl,
+            manifestUrl: newManifestUrl,
+            outputFormat,
+            fileRequestHeaders
+        });
         // session.save();
         // res.json(session);
     } catch (error) {
