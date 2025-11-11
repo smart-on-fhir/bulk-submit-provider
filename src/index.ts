@@ -11,9 +11,9 @@ const app = createApp();
 if (NODE_ENV !== 'production') {
     const defaultSubmission = new Submission({ destinationBaseUrl: 'http://localhost:3333', name: 'Example Bulk Submission' });
     (defaultSubmission as any).id = 'example-submission';
-    defaultSubmission.addJob(`${BASE_URL}/api/manifests/1`, BASE_URL);
-    defaultSubmission.addJob(`${BASE_URL}/api/manifests/2`, BASE_URL);
-    defaultSubmission.addJob(`${BASE_URL}/api/manifests/3`, BASE_URL);
+    defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/1`, FHIRBaseUrl: BASE_URL });
+    defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/2`, FHIRBaseUrl: BASE_URL });
+    defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/3`, FHIRBaseUrl: BASE_URL });
     db.sessions.set(defaultSubmission.id, defaultSubmission);
 }
 

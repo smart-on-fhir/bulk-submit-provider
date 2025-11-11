@@ -53,6 +53,8 @@ declare global {
             status: 'not-started' | 'submitting' | 'submitted' | 'aborted' | 'failed' | 'replaced';
             startedAt: string | null;
             completedAt: string | null;
+            outputFormat?: string;
+            fileRequestHeaders?: HeaderDescriptor[];
         }
 
         type JobLogEntryLevel = 'info' | 'warn' | 'error';
@@ -83,6 +85,11 @@ declare global {
 
         interface ResultManifest {
             [key: string]: any;
+        }
+
+        interface HeaderDescriptor {
+            headerName : string;
+            headerValue: string;
         }
     }
 }

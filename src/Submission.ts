@@ -138,7 +138,17 @@ export default class Submission
     // Methods to manage manifests within this submission
     // -------------------------------------------------------------------------
 
-    addJob(manifestUrl: string, FHIRBaseUrl: string) {
+    addJob({
+        manifestUrl,
+        FHIRBaseUrl,
+        outputFormat,
+        fileRequestHeaders
+    }: {
+        manifestUrl: string
+        FHIRBaseUrl: string
+        outputFormat?: string
+        fileRequestHeaders?: App.HeaderDescriptor[]
+    }) {
 
         if (this.manifests.find(m => m.manifestUrl === manifestUrl)) {
             throw new Error('Manifest already exists in this submission');
@@ -149,7 +159,9 @@ export default class Submission
             FHIRBaseUrl,
             status: 'not-started',
             startedAt: null,
-            completedAt: null
+            completedAt: null,
+            outputFormat,
+            fileRequestHeaders
         });
     }
 
@@ -196,7 +208,11 @@ export default class Submission
             await this.kickoffStatusPolling();
         }
 
-        this.addJob(newManifest.manifestUrl, newManifest.FHIRBaseUrl);
+        this.addJob({
+            manifestUrl: newManifest.manifestUrl,
+            FHIRBaseUrl: newManifest.FHIRBaseUrl
+        });
+
         this.save();
 
         return this;

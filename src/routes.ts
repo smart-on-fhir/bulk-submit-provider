@@ -136,7 +136,7 @@ router.post('/api/sessions/:id/complete', async (req: Request, res: Response) =>
 // Add manifest
 router.post('/api/sessions/:id/manifests', (req: Request, res: Response) => {
     const { id } = req.params;
-    const { manifestUrl, outputFormat, FHIRBaseUrl } = req.body;
+    const { manifestUrl, outputFormat, FHIRBaseUrl, fileRequestHeaders } = req.body;
     if (!manifestUrl || !FHIRBaseUrl) {
         return res.status(400).json({ error: 'Missing manifestUrl or FHIRBaseUrl' });
     }
@@ -149,7 +149,7 @@ router.post('/api/sessions/:id/manifests', (req: Request, res: Response) => {
         return;
     }
 
-    session.addJob(manifestUrl, FHIRBaseUrl);
+    session.addJob({ manifestUrl, FHIRBaseUrl, outputFormat, fileRequestHeaders });
     session.save();
     res.json(session);
 });
