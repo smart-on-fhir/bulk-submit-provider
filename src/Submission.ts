@@ -215,6 +215,20 @@ export default class Submission
         if (newManifest.outputFormat) {
             parameters.push({ name: 'outputFormat', valueString: newManifest.outputFormat });
         }
+
+        if (newManifest.fileRequestHeaders && newManifest.fileRequestHeaders.length > 0) {
+            parameters.push({
+                name: 'fileRequestHeaders',
+                part: newManifest.fileRequestHeaders.map(header => ({
+                    name: 'headerName',
+                    valueString: header.headerName
+                })).concat(newManifest.fileRequestHeaders.map(header => ({
+                    name: 'headerValue',
+                    valueString: header.headerValue
+                })))
+            });
+        }
+
         const { error } = await this.bulkSubmitRequest(parameters);
 
         if (!error) {
@@ -341,6 +355,20 @@ export default class Submission
             parameters.push({ name: 'outputFormat', valueString: manifest.outputFormat });
         }
 
+        if (manifest.fileRequestHeaders && manifest.fileRequestHeaders.length > 0) {
+            manifest.fileRequestHeaders.forEach(header => {
+               parameters.push({
+                   name: 'fileRequestHeader',
+                   part: [{
+                       name: 'headerName',
+                       valueString: header.headerName
+                   },{
+                       name: 'headerValue',
+                       valueString: header.headerValue
+                   }]
+               });
+           });
+        }
 
         const { error } = await this.bulkSubmitRequest(parameters);
 
