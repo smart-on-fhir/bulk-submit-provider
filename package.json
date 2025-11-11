@@ -13,6 +13,7 @@
     "test": "mocha --no-warnings -r ts-node/register -r source-map-support/register --recursive \"test/**/*.spec.ts\"",
     "test:fast": "mocha --no-warnings -r ts-node/register/transpile-only -r source-map-support/register --recursive \"test/**/*.spec.ts\"",
     "test:ci": "npm run type-check && npm run test:fast",
+    "test:watch": "npm run test -- --watch",
     "type-check": "tsc -p tsconfig.json --noEmit"
   },
   "repository": {

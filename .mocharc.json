@@ -6,5 +6,7 @@
   "extension": ["ts"],
   "spec": "test/**/*.spec.ts",
   "recursive": true,
-  "timeout": 5000
+  "timeout": 5000,
+  "watch-files": ["src/**/*.ts", "test/**/*.ts"],
+  "watch": false
 }

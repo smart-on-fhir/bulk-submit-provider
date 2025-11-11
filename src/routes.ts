@@ -161,7 +161,8 @@ router.put('/api/sessions/:id/manifests/:index', (req: Request, res: Response) =
     const {
         manifestUrl,
         outputFormat,
-        FHIRBaseUrl
+        FHIRBaseUrl,
+        fileRequestHeaders
     } = req.body;
 
     const session: Submission | undefined = db.sessions.get(id);
@@ -180,6 +181,8 @@ router.put('/api/sessions/:id/manifests/:index', (req: Request, res: Response) =
     if (manifestUrl)        manifest.manifestUrl        = manifestUrl;
     if (FHIRBaseUrl)        manifest.FHIRBaseUrl        = FHIRBaseUrl;
     if (outputFormat)       manifest.outputFormat       = outputFormat;
+    if (fileRequestHeaders) manifest.fileRequestHeaders = fileRequestHeaders;
+
     session.save();
     res.json(session);
 });
