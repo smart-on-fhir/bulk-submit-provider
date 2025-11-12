@@ -67,6 +67,8 @@ export default class Submission
 
     private progress: number = 0;
 
+    private aborted = false;
+
     public constructor({ destinationBaseUrl, name, submitter, owner_id } : { destinationBaseUrl: string, name?: string, submitter?: App.Submitter, owner_id?: string }) {
         this.id = uuidV4();
         this.destinationBaseUrl = destinationBaseUrl;
@@ -83,6 +85,9 @@ export default class Submission
     }
 
     get status(): App.Submission['status'] {
+        if (this.aborted) {
+            return 'aborted';
+        }
         if (this.resultManifest) {
             return 'complete';
         }
@@ -332,9 +337,13 @@ export default class Submission
 
     async abort() {
         this.log.add(`Marking bulk submission as aborted...`);
-        return await this.bulkSubmitRequest([
+        const result = await this.bulkSubmitRequest([
             { name: 'submissionStatus', valueCoding: CODING_ABORTED }
         ]);
+        this.aborted = true;
+        this.manifests.forEach(m => m.status = 'not-started');
+        this.save();
+        return result;
     }
 
     async submitManifest(manifestUrl: string) {

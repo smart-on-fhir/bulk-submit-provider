@@ -112,6 +112,19 @@ export default function ViewSession() {
     //     }
     // };
 
+    const abortSubmission = async () => {
+        if (!session) return;
+        setLoading(true);
+        const response = await fetch(`/api/sessions/${session.id}/abort`, { method: 'POST' });
+        setLoading(false);
+        if (response.ok) {
+            const data = await response.json();
+            setSession(data);
+        } else {
+            alert('Failed to abort submission. Please try again later.');
+        }
+    };
+
     // Finalize submission by updating the session submissionStatus to 'complete'
     const completeSubmission = async () => {
         if (!session) return;
@@ -201,6 +214,8 @@ export default function ViewSession() {
                                                 <b className='text-danger'>Failed<i className="bi bi-x-circle-fill text-danger ms-2" /></b>
                                             ) : session.status === 'not-started' ? (
                                                 <span className='text-secondary'>Not Started</span>
+                                            ) : session.status === 'aborted' ? (
+                                                <b className='text-danger'>Aborted<i className="bi bi-x-circle-fill text-danger ms-2" /></b>
                                             ) : null
                                         }
                                     </td>
@@ -251,12 +266,17 @@ export default function ViewSession() {
                                 deleteSession();
                             }
                         }}>Delete</button>
-                        <button className='btn btn-sm btn-outline-secondary px-3 d-block w-100 mt-2' type="button" disabled>Abort</button>
+                        <button
+                            className='btn btn-sm btn-outline-secondary px-3 d-block w-100 mt-2'
+                            type="button"
+                            disabled={completed || ['aborted', 'complete', 'failed', 'not-started'].includes(session.status)}
+                            onClick={abortSubmission}
+                        >Abort</button>
                         <button
                             className='btn btn-sm btn-outline-secondary px-3 d-block w-100 mt-2'
                             type="button"
                             onClick={completeSubmission}
-                            disabled={completing || completed || session.status === 'complete' || session.status === 'failed' || session.status === 'not-started'}
+                            disabled={completing || completed || ['complete', 'failed', 'not-started', 'aborted'].includes(session.status)}
                         >
                             { completing && <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" /> }
                             Complete
@@ -276,12 +296,14 @@ export default function ViewSession() {
                         <h4>Manifests</h4>
                     </div>
                     <div className='col-auto'>
-                        <button
-                            className="btn btn-link text-decoration-none px-0 text-primary-emphasis"
-                            onClick={() => setShowDialog(true)}>
-                            <i className="bi bi-plus me-2"/>
-                            Add Manifest
-                        </button>
+                        { (session.status !== 'complete' && session.status !== 'aborted') &&
+                            <button
+                                className="btn btn-link text-decoration-none px-0 text-primary-emphasis"
+                                onClick={() => setShowDialog(true)}>
+                                <i className="bi bi-plus me-2"/>
+                                Add Manifest
+                            </button>
+                        }
                     </div>
                 </div>
                 <div className='border rounded-3 jobs-table-wrapper bg-body-secondary bg-opacity-25'>

@@ -131,6 +131,29 @@ router.post('/api/sessions/:id/complete', async (req: Request, res: Response) =>
     }
 });
 
+// Abort Submission by ID
+router.post('/api/sessions/:id/abort', async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const session = db.sessions.get(id);
+    if (!session) {
+        return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    if (!checkSubmissionOwnership(session, res)) {
+        return;
+    }
+
+    try {
+        await session.abort();
+    } catch (error) {
+        console.error(error);
+    } finally {
+        session.save();
+        res.json(session);
+    }
+});
+
 // Manifests -------------------------------------------------------------------
 
 // Add manifest

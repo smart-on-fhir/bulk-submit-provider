@@ -33,7 +33,7 @@ declare global {
             name: string;
             destinationBaseUrl: string;
             createdAt: string;
-            status: 'not-started' | 'complete' | 'in-progress' | 'failed';
+            status: 'not-started' | 'complete' | 'in-progress' | 'failed' | 'aborted';
             submitter: Submitter;
             progress: number;
             log: JobLogEntry[];
@@ -43,7 +43,7 @@ declare global {
                 completedAt: string
                 duration   : string
                 totalErrors: number
-                manifest   : any
+                manifest   : ResultManifest
             }
         }
 
@@ -84,6 +84,24 @@ declare global {
         }
 
         interface ResultManifest {
+            extension: {
+                submissionId: string
+            },
+            transactionTime: string
+            request: string
+            requiresAccessToken: boolean
+            output?: any[]
+            error: {
+                type?: string
+                url ?: string
+                extension?: {
+                    manifestUrl?: string
+                    countSeverity?: {
+                        success?: number
+                        error?: number
+                    }
+                }
+            }[]
             [key: string]: any;
         }
 
