@@ -241,20 +241,6 @@ export default function ViewSession() {
                                             <code className='badge bg-danger rounded-pill'>{session.result.totalErrors}</code>
                                         }</td>
                                     </tr>
-                                    { session.result.manifest.error.length > 0 && (
-                                        <tr>
-                                            <td className='text-end align-top pe-2 text-muted fw-semibold'>Error Outcomes:</td>
-                                            <td>
-                                                <ul className='list-unstyled mb-0 small'>
-                                                    {session.result.manifest.error.map((error: any, index: number) => (
-                                                        <li key={index}>
-                                                            <a href={error.url} target='_blank' rel='noopener noreferrer'>{error.url.split('/').pop()}</a>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </td>
-                                        </tr>
-                                    )}
                                 </>)}
                             </tbody>
                         </table>
@@ -309,88 +295,138 @@ export default function ViewSession() {
                 <div className='border rounded-3 jobs-table-wrapper bg-body-secondary bg-opacity-25'>
                     <table className="table table-hover m-0 table-layout-fixed align-middle">
                         <tbody>
-                            {session.manifests.map((job, index) => (
-                                <tr key={index}>
-                                    <td>
-                                        <div className="row g-1 align-items-start flex-nowrap" title={job.manifestUrl}>
-                                            <div className='col-auto lh-sm'>
-                                                <i className="bi bi-file-earmark-text text-secondary mx-1" />
-                                            </div>
-                                            <div className='col lh-sm' style={{ wordBreak: 'break-all' }}>
-                                                {job.manifestUrl}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="text-nowrap small" style={{ width: '10em' }}>
-                                        { job.status === "aborted"     && <span className="badge bg-danger rounded-pill">Aborted</span> }
-                                        { job.status === "failed"      && <span className="badge bg-danger rounded-pill">Failed</span>  }
-                                        { job.status === "submitted"   && <span><i className="bi bi-check-circle-fill text-success me-2" />Submitted</span> }
-                                        { job.status === "replaced"    && <span className="badge bg-warning text-dark rounded-pill">Replaced</span> }
-                                        { job.status === "submitting"  && <span className='text-secondary'><span className="spinner-border spinner-border-sm me-2" role="status" />Working...</span> }
-                                        { job.status === "not-started" && (
-                                            <button
-                                                className='btn btn-sm text-primary-emphasis border-0 p-0 bg-transparent'
-                                                onClick={() => submitJob(job)}
-                                                disabled={ completed || completing || session.status === 'complete' }
-                                            >
-                                                <i className='bi bi-send me-2' />Submit
-                                            </button>
-                                        )}
-                                    </td>
-                                    { session.status !== 'complete' && (
-                                        <td className="text-nowrap pe-2" style={{ width: '2em' }}>
-                                            <div className="dropend">
-                                                <button type="button" className="btn btn-sm btn-outline-secondary border-0 px-2" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i className='bi bi-three-dots-vertical' />
-                                                </button>
-                                                <ul className="dropdown-menu shadow p-1">
-                                                    
-                                                    <button
-                                                        className="dropdown-item ps-2 rounded-1"
-                                                        disabled={!['failed', 'aborted', 'completed'].includes(job.status)}
-                                                        onClick={() => submitJob(job)}>
-                                                        <i className='bi bi-arrow-clockwise me-3'/>
-                                                        Retry
-                                                    </button>
-                                                    
-                                                    <button
-                                                        className="dropdown-item ps-2 rounded-1"
-                                                        disabled={!['not-started', 'aborted', 'failed'].includes(job.status)}
-                                                        onClick={() => setShowDialog(index)}>
-                                                        <i className="bi bi-pencil-square me-3"/>
-                                                        Edit
-                                                    </button>
-                                                    
-                                                    <button
-                                                        className="dropdown-item ps-2 rounded-1"
-                                                        disabled={!['not-started', 'aborted', 'failed'].includes(job.status)}
-                                                        onClick={() => removeManifestAt(index)}>
-                                                        <i className="bi bi-trash me-3"/>
-                                                        Remove
-                                                    </button>
-
-                                                    {/* <button
-                                                        className="dropdown-item ps-2 rounded-1"
-                                                        disabled={session.status !== 'in-progress' || !['submitting', 'submitted'].includes(job.status)}
-                                                        onClick={() => abortJobAt(index)}
-                                                        title="Aborting a job works by sending an empty manifest to replace the current one">
-                                                        <i className='bi bi-x-circle me-3'/>
-                                                        Abort
-                                                    </button> */}
-
-                                                    <button
-                                                        className="dropdown-item ps-2 rounded-1"
-                                                        disabled={!['submitted', 'failed'].includes(job.status)}
-                                                        onClick={() => setShowReplaceDialog(index)}>
-                                                        <i className='bi bi-shuffle me-3'/>
-                                                        Replace
-                                                    </button>
-                                                </ul>
+                            {session.manifests.map((job, index) => {
+                                const errorEntries = session.result?.manifest?.error?.filter(e => {
+                                    return e.extension?.manifestUrl === job.manifestUrl;
+                                });
+                                return (
+                                    <tr key={index}>
+                                        <td>
+                                            <div className="row g-1 align-items-start flex-nowrap" title={job.manifestUrl}>
+                                                <div className='col-auto lh-sm'>
+                                                    <i className="bi bi-file-earmark-text text-secondary mx-1" />
+                                                </div>
+                                                <div className='col lh-sm' style={{ wordBreak: 'break-all' }}>
+                                                    {job.manifestUrl}
+                                                    { errorEntries && (
+                                                        <table className='mt-1 ms-2 text-muted small'>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td className='text-end pe-1 text-nowrap'>Success Count:</td>
+                                                                    <td>
+                                                                        { errorEntries.some(e => e.extension && e.extension.countSeverity) ?
+                                                                            errorEntries.some(e => e.extension && e.extension.countSeverity?.success) ?
+                                                                                <b className='text-success'>
+                                                                                { errorEntries.reduce((sum: number, entry) => sum + (entry.extension?.countSeverity?.success || 0), 0) }
+                                                                                </b> :
+                                                                                0 :
+                                                                            <span>No data</span>
+                                                                        }
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className='text-end pe-1 text-nowrap'>Errors Count:</td>
+                                                                    <td>
+                                                                        { errorEntries.some(e => e.extension && e.extension.countSeverity) ?
+                                                                            errorEntries.some(e => e.extension && e.extension.countSeverity?.error) ?
+                                                                                <b className='text-danger'>
+                                                                                { errorEntries.reduce((sum: number, entry) => sum + (entry.extension?.countSeverity?.error || 0), 0) }
+                                                                                </b> :
+                                                                                0 :
+                                                                            <span>No data</span>
+                                                                        }
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className='text-end pe-1 text-nowrap align-top'>Error Outcomes:</td>
+                                                                    <td className='align-top'>
+                                                                        { errorEntries.length > 0 ? errorEntries.map((error: any, index: number) => (
+                                                                            <a key={index} href={error.url} target='_blank' rel='noopener noreferrer' className='me-2'>
+                                                                                {error.url.split('/').pop()}
+                                                                            </a>
+                                                                        )) : <span>No data</span> }
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    )}
+                                                </div>
                                             </div>
                                         </td>
-                                    ) }
-                                </tr>
-                            ))}
+                                        
+                                        { session.status !== 'complete' && session.status !== 'aborted' && (
+                                            <>
+                                                <td className="text-nowrap small" style={{ width: '10em' }}>
+                                                    { job.status === "aborted"     && <span className="badge bg-danger rounded-pill">Aborted</span> }
+                                                    { job.status === "failed"      && <span className="badge bg-danger rounded-pill">Failed</span>  }
+                                                    { job.status === "submitted"   && <span><i className="bi bi-check-circle-fill text-success me-2" />Submitted</span> }
+                                                    { job.status === "replaced"    && <span className="badge bg-warning text-dark rounded-pill">Replaced</span> }
+                                                    { job.status === "submitting"  && <span className='text-secondary'><span className="spinner-border spinner-border-sm me-2" role="status" />Working...</span> }
+                                                    { job.status === "not-started" && (
+                                                        <button
+                                                            className='btn btn-sm text-primary-emphasis border-0 p-0 bg-transparent'
+                                                            onClick={() => submitJob(job)}
+                                                            disabled={ completed || completing }
+                                                        >
+                                                            <i className='bi bi-send me-2' />Submit
+                                                        </button>
+                                                    )}
+                                                </td>
+                                                <td className="text-nowrap" style={{ width: '2em' }}>
+                                                    <div className="dropend">
+                                                        <button type="button" className="btn btn-sm btn-outline-secondary border-0 px-2" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i className='bi bi-three-dots-vertical' />
+                                                        </button>
+                                                        <ul className="dropdown-menu shadow p-1">
+                                                            
+                                                            <button
+                                                                className="dropdown-item ps-2 rounded-1"
+                                                                disabled={!['failed', 'aborted', 'completed'].includes(job.status)}
+                                                                onClick={() => submitJob(job)}>
+                                                                <i className='bi bi-arrow-clockwise me-3'/>
+                                                                Retry
+                                                            </button>
+                                                            
+                                                            <button
+                                                                className="dropdown-item ps-2 rounded-1"
+                                                                disabled={!['not-started', 'aborted', 'failed'].includes(job.status)}
+                                                                onClick={() => setShowDialog(index)}>
+                                                                <i className="bi bi-pencil-square me-3"/>
+                                                                Edit
+                                                            </button>
+                                                            
+                                                            <button
+                                                                className="dropdown-item ps-2 rounded-1"
+                                                                disabled={!['not-started', 'aborted', 'failed'].includes(job.status)}
+                                                                onClick={() => removeManifestAt(index)}>
+                                                                <i className="bi bi-trash me-3"/>
+                                                                Remove
+                                                            </button>
+
+                                                            {/* <button
+                                                                className="dropdown-item ps-2 rounded-1"
+                                                                disabled={session.status !== 'in-progress' || !['submitting', 'submitted'].includes(job.status)}
+                                                                onClick={() => abortJobAt(index)}
+                                                                title="Aborting a job works by sending an empty manifest to replace the current one">
+                                                                <i className='bi bi-x-circle me-3'/>
+                                                                Abort
+                                                            </button> */}
+
+                                                            <button
+                                                                className="dropdown-item ps-2 rounded-1"
+                                                                disabled={!['submitted', 'failed'].includes(job.status)}
+                                                                onClick={() => setShowReplaceDialog(index)}>
+                                                                <i className='bi bi-shuffle me-3'/>
+                                                                Replace
+                                                            </button>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </>
+                                        ) }
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
