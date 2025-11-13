@@ -14,6 +14,8 @@ if (NODE_ENV !== 'production') {
     defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/1`, FHIRBaseUrl: BASE_URL });
     defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/2`, FHIRBaseUrl: BASE_URL });
     defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/3`, FHIRBaseUrl: BASE_URL });
+    defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/4`, FHIRBaseUrl: BASE_URL });
+    defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/5`, FHIRBaseUrl: BASE_URL });
     db.sessions.set(defaultSubmission.id, defaultSubmission);
 }
 

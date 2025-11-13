@@ -82,9 +82,21 @@ export default function ManifestForm({
                         <div className="mb-3" style={{ breakInside: 'avoid' }}>
                             <label className="form-label text-primary-emphasis fw-semibold">Manifest URL</label>
                             <datalist id="manifestUrls">
-                                <option value={`${window.location.origin}/api/manifests/1`}>Should export successfully</option>
-                                <option value={`${window.location.origin}/api/manifests/2`}>Has invalid output entry linking to missing file</option>
-                                <option value={`${window.location.origin}/api/manifests/3`}>Has incorrect output entry count values</option>
+                                <option value={`${window.location.origin}/api/manifests/1`}>
+                                    Should export successfully
+                                </option>
+                                <option value={`${window.location.origin}/api/manifests/2`}>
+                                    Has invalid output entry linking to missing file
+                                </option>
+                                <option value={`${window.location.origin}/api/manifests/3`}>
+                                    Has incorrect output entry count values
+                                </option>
+                                <option value={`${window.location.origin}/api/manifests/4`}>
+                                    Contains one resource with unexpected resourceType
+                                </option>
+                                <option value={`${window.location.origin}/api/manifests/5`}>
+                                    Contains one resource with invalid resourceType
+                                </option>
                             </datalist>
                             <input
                                 type="url"
