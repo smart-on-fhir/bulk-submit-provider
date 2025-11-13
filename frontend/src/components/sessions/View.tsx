@@ -2,6 +2,7 @@ import React, { useState, useEffect }   from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Prism as SyntaxHighlighter }   from 'react-syntax-highlighter';
 import { atomDark }                     from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { OperationOutcome }             from 'fhir/r4';
 import Collapse                         from '../Collapse';
 import ManifestFormDialog               from '../ManifestFormDialog';
 import ManifestReplaceDialog            from '../ManifestReplaceDialog';
@@ -308,48 +309,7 @@ export default function ViewSession() {
                                                 </div>
                                                 <div className='col lh-sm' style={{ wordBreak: 'break-all' }}>
                                                     {job.manifestUrl}
-                                                    { errorEntries && (
-                                                        <table className='mt-1 ms-2 text-muted small'>
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td className='text-end pe-1 text-nowrap'>Success Count:</td>
-                                                                    <td>
-                                                                        { errorEntries.some(e => e.extension && e.extension.countSeverity) ?
-                                                                            errorEntries.some(e => e.extension && e.extension.countSeverity?.success) ?
-                                                                                <b className='text-success'>
-                                                                                { errorEntries.reduce((sum: number, entry) => sum + (entry.extension?.countSeverity?.success || 0), 0) }
-                                                                                </b> :
-                                                                                0 :
-                                                                            <span>No data</span>
-                                                                        }
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td className='text-end pe-1 text-nowrap'>Errors Count:</td>
-                                                                    <td>
-                                                                        { errorEntries.some(e => e.extension && e.extension.countSeverity) ?
-                                                                            errorEntries.some(e => e.extension && e.extension.countSeverity?.error) ?
-                                                                                <b className='text-danger'>
-                                                                                { errorEntries.reduce((sum: number, entry) => sum + (entry.extension?.countSeverity?.error || 0), 0) }
-                                                                                </b> :
-                                                                                0 :
-                                                                            <span>No data</span>
-                                                                        }
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td className='text-end pe-1 text-nowrap align-top'>Error Outcomes:</td>
-                                                                    <td className='align-top'>
-                                                                        { errorEntries.length > 0 ? errorEntries.map((error: any, index: number) => (
-                                                                            <a key={index} href={error.url} target='_blank' rel='noopener noreferrer' className='me-2'>
-                                                                                {error.url.split('/').pop()}
-                                                                            </a>
-                                                                        )) : <span>No data</span> }
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    )}
+                                                    { errorEntries && <ManifestReport entries={errorEntries} /> }
                                                 </div>
                                             </div>
                                         </td>
@@ -490,5 +450,104 @@ export default function ViewSession() {
             )}
 
         </div>
+    );
+}
+
+function ManifestReport({ entries }: { entries: App.ResultManifest['error'] }) {
+
+    const hasSuccessCount = entries.some(e => e.extension && e.extension.countSeverity?.success);
+    const hasErrorCount   = entries.some(e => e.extension && e.extension.countSeverity?.error);
+    const successCount    = entries.reduce((sum: number, entry) => sum + (entry.extension?.countSeverity?.success || 0), 0);
+    const errorCount      = entries.reduce((sum: number, entry) => sum + (entry.extension?.countSeverity?.error || 0), 0);
+
+    return (
+        <table className='mt-1 ms-2 text-muted small'>
+            <tbody>
+                <tr>
+                    <td className='text-end pe-1 text-nowrap'>Success Count:</td>
+                    <td>
+                        { hasSuccessCount ?
+                            successCount ?
+                                <b className='text-success'>{ successCount }</b> :
+                                0 :
+                            <span>No data</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td className='text-end pe-1 text-nowrap'>Errors Count:</td>
+                    <td>
+                        { hasErrorCount ?
+                            errorCount ?
+                                <b className='text-danger'>{ errorCount }</b> :
+                                0 :
+                            <span>No data</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td className='text-end pe-1 text-nowrap align-top'>Error Outcomes:</td>
+                    <td className='align-top'>
+                        { entries.length > 0 ? entries.map((error: any, index: number) => (
+                            <a key={index} href={error.url} target='_blank' rel='noopener noreferrer' className='me-2'>
+                                {error.url.split('/').pop()}
+                            </a>
+                        )) : <span>No data</span> }
+                    </td>
+                </tr>
+                { ((errorCount > 0 && errorCount < 100) || (successCount > 0 && successCount < 100)) && (
+                    <tr>
+                        <td className='text-end pe-1 text-nowrap align-top'>Errors Preview (first 10):</td>
+                        <td className='align-top'><ErrorPreview entries={entries} /></td>
+                    </tr>
+                )}
+            </tbody>
+        </table>
+    );
+}
+
+function ErrorPreview({ entries }: { entries: App.ResultManifest['error'] }) {
+
+    const [messages, setMessages] = useState<string[]>([]);
+
+    useEffect(() => {
+        entries.forEach(entry => {
+            if (entry.url) {
+                fetch(entry.url)
+                .then(res => res.text())
+                .then(text => text.split('\n').slice(0, 10).map(line => line.trim()).filter(Boolean).map(line => JSON.parse(line) as OperationOutcome))
+                .then((resources: OperationOutcome[]) => {
+                    resources.forEach(resource => {
+                        const msg = resource.issue[0].details?.text || '';
+                        if (msg) {
+                            setMessages(prev => {
+                                if (!prev.includes(msg) && prev.length < 10) {
+                                    return [...prev, msg];
+                                }
+                                return prev;
+                            });
+                        }
+                    });
+                })
+                .catch(console.error);
+            }
+        });
+
+    }, [entries]);
+
+    if (messages.length === 0) {
+        return 'Loading...';
+    }
+
+    return (
+        <ul className='m-0 ps-3 small' style={{ maxHeight: 200, overflowY: 'auto' }}>
+            { messages.map((msg, index) => <li key={index} style={{
+                whiteSpace: 'pre-wrap',
+                lineHeight: 'inherit',
+                margin: '0.2em 0',
+                fontFamily: 'monospace',
+                tabSize: 4
+            }}>{msg}</li>) }
+        </ul>
     );
 }
