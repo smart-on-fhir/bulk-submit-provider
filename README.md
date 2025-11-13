@@ -24,7 +24,7 @@ npm run dev:frontend
 - Build and start:
 
 ```bash
-npm run build:frontend
+npm run build
 npm start
 ```
 
