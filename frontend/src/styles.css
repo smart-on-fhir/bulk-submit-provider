@@ -23,10 +23,10 @@ pre:has(> code.language-json) {
 pre code.language-json {
     white-space: pre-wrap !important;
     background-color: transparent !important;
-    span { mix-blend-mode: exclusion; }
     font-family: 'DejaVu Sans Mono', Hack, Menlo, Monaco, 'Courier New', monospace !important;
     line-height: 1.2 !important;
 }
+pre code.language-json span { mix-blend-mode: exclusion; }
 
 .jobs-table-wrapper tbody tr td{
     background: transparent;
@@ -78,4 +78,46 @@ pre code.language-json {
 }
 .vi-collapse.show > .vi-collapse-header > .bi.bi-caret-right-fill {
     transform: rotate(90deg);
+}
+
+/* markdown-container ------------------------------------------------------- */
+
+.markdown-container {
+  --code-bg: #f1f3f5;
+  --code-color: #0f1720;
+  --pre-bg: #0f1720;
+  --pre-color: #e6eef7;
+  --code-border: rgba(0,0,0,0.06);
+}
+
+[data-bs-theme="dark"] .markdown-container {
+  --code-bg: #000;
+  --code-color: #e6eef7;
+  --pre-bg: #081226;
+  --pre-color: #cfe3ff;
+  --code-border: rgba(255,255,255,0.2);
+}
+
+.markdown-container code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.3rem;
+  border-radius: 6px;
+  border: 1px solid var(--code-border);
+}
+
+.markdown-container pre > div {
+  margin: 0 !important;
+}
+
+.markdown-container pre,
+.markdown-container .react-syntax-highlighter {
+  margin: 1rem 0;
+}
+
+.markdown-container pre code,
+.markdown-container .react-syntax-highlighter code {
+  padding: 0.5rem 0 !important;
+  border: 1px solid #8882;
+  display: block;
+  margin: 0 !important;
 }

@@ -20,7 +20,7 @@ export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) =
                   <NavLink className="nav-link" to="/sessions">Submissions</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" to="/health">API</NavLink>
+                  <NavLink className="nav-link" to="/docs">API</NavLink>
                 </li>
               </ul>
             </div>
