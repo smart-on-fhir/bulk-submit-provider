@@ -26,7 +26,7 @@ export default function List() {
     }, []);
 
     return (
-        <div>
+        <div className="justify-self-start">
             <div className="row align-items-center">
                 <div className="col">
                     <h1 className="mb-0">Submissions</h1>

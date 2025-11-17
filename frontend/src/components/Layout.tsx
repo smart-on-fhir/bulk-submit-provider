@@ -28,8 +28,8 @@ export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) =
         </nav>
       </header>
 
-      <main className="flex-fill">
-        <div className="container py-4">
+      <main className="flex-fill d-flex flex-column">
+        <div className="container py-4 h-100 d-flex flex-column">
           {children}
         </div>
       </main>
@@ -37,7 +37,11 @@ export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) =
       <footer className="text-muted py-3 mt-auto">
         <div className="container d-flex flex-column flex-md-row justify-content-between align-items-center">
           <div className="small">&copy; {new Date().getFullYear()} Bulk Submit Provider</div>
-          <div className="small">GitHub <a href="https://github.com/smart-on-fhir/bulk-submit-provider" target="_blank" rel="noreferrer">Repository</a></div>
+          <div className="small">
+            <a href="https://github.com/smart-on-fhir/bulk-submit-provider" target="_blank" rel="noreferrer" className='text-decoration-none'>
+              <i className="bi bi-github me-1" />GitHub Repository
+            </a>
+          </div>
         </div>
       </footer>
     </div>
