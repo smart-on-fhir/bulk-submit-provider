@@ -16,6 +16,9 @@ export const NODE_ENV = process.env.NODE_ENV || 'production';
 // Throttle delay (ms) to delay every http response (for testing).
 export const THROTTLE = parseInt(process.env.THROTTLE || (NODE_ENV === 'production' ? '0' : '1000'), 10);
 
+// How long submissions are kept before being deleted (in hours)
+export const SUBMISSION_LIFETIME_HOURS = parseInt(process.env.SUBMISSION_LIFETIME_HOURS || '48', 10);
+
 
 export const CODING_IN_PROGRESS: App.SubmissionStatusCoding = {
     system: 'http://hl7.org/fhir/uv/bulkdata/ValueSet/submission-status',
