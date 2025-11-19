@@ -14,11 +14,14 @@ import {
 export default class Submission
 {
     /**
-     * Unique identifier for the Submission
-     * TODO: have separate Submission ID for users to edit
+     * Unique identifier for the Submission. This ine is in fact editable by
+     * the user (but then we have to make sure it's unique in the database).
      */
-    public readonly id: string;
+    public id: string;
 
+    /**
+     * The ID of the user who owns this submission
+     */
     public readonly owner_id?: string;
 
     /**
@@ -69,8 +72,29 @@ export default class Submission
 
     private aborted = false;
 
-    public constructor({ destinationBaseUrl, name, submitter, owner_id } : { destinationBaseUrl: string, name?: string, submitter?: App.Submitter, owner_id?: string }) {
-        this.id = uuidV4();
+    public constructor({
+        destinationBaseUrl,
+        name,
+        submitter,
+        owner_id,
+        id
+    } : {
+        destinationBaseUrl: string
+        name?: string
+        submitter?: App.Submitter
+        owner_id?: string
+        id?: string
+    }) {
+
+        if (id) {
+            if (db.sessions.has(id)) {
+                throw new Error('Submission with the new ID already exists');
+            }
+            this.id = id;
+        } else {
+            this.id = uuidV4();
+        }
+
         this.destinationBaseUrl = destinationBaseUrl;
         if (name) {
             this.name = name;

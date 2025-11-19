@@ -47,38 +47,59 @@ router.get('/api/sessions', (req: Request, res: Response) => {
 
 // Create new Submission
 router.post('/api/sessions', (req: Request, res: Response) => {
-    const { destinationBaseUrl, name, submitter } = req.body;
-    if (!destinationBaseUrl) {
-        return res.status(400).json({ error: 'Missing destinationBaseUrl' });
+    try {
+        const { destinationBaseUrl, name, submitter, id } = req.body;
+        if (!destinationBaseUrl) {
+            return res.status(400).json({ error: 'Missing destinationBaseUrl' });
+        }
+        const session = new Submission({
+            destinationBaseUrl,
+            name,
+            submitter,
+            owner_id: res.locals.sessionId,
+            id
+        }).save();
+        res.status(201).json(session);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: getErrorMessage(err) });
     }
-    const session = new Submission({
-        destinationBaseUrl,
-        name,
-        submitter,
-        owner_id: res.locals.sessionId
-    }).save();
-    res.status(201).json(session);
 });
 
 // Update Submission by ID
 router.put('/api/sessions/:id', (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { destinationBaseUrl, submitter, name } = req.body;
-    if (!destinationBaseUrl) {
-        return res.status(400).json({ error: 'Missing destinationBaseUrl' });
+    try {
+        const { id } = req.params;
+        const { destinationBaseUrl, submitter, name, id: newId } = req.body;
+        if (!destinationBaseUrl) {
+            return res.status(400).json({ error: 'Missing destinationBaseUrl' });
+        }
+        const session = db.sessions.get(id);
+        if (!session) {
+            return res.status(404).json({ error: 'Submission not found' });
+        }
+        if (!checkSubmissionOwnership(session, res)) {
+            return;
+        }
+        session.destinationBaseUrl = destinationBaseUrl;
+        session.submitter = submitter;
+        session.name = name;
+
+        if (newId && newId !== id) {
+            // change the ID
+            if (db.sessions.has(newId)) {
+                return res.status(400).json({ error: 'Submission with this ID already exists' });
+            }
+            db.sessions.delete(id);
+            (session as any).id = newId;
+        }
+
+        session.save();
+        res.json(session);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: getErrorMessage(err) });
     }
-    const session = db.sessions.get(id);
-    if (!session) {
-        return res.status(404).json({ error: 'Submission not found' });
-    }
-    if (!checkSubmissionOwnership(session, res)) {
-        return;
-    }
-    session.destinationBaseUrl = destinationBaseUrl;
-    session.submitter = submitter;
-    session.name = name;
-    session.save();
-    res.json(session);
 });
 
 // Get Submission by ID

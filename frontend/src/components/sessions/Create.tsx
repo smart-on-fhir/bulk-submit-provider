@@ -5,28 +5,37 @@ import SubmissionForm from "./Form";
 export default function CreateSession() {
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (sub: Partial<App.Submission>) => {
+    const handleSubmit = async (sub: Partial<App.Submission>) => {
         setLoading(true);
-        fetch('/api/sessions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(sub)
-        }).then(res => {
-            if (res.ok) {
-                return res.json();
-            } else {
-                throw new Error('Network response was not ok');
+
+        try {
+            const res = await fetch('/api/sessions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(sub)
+            });
+
+            const txt = await res.text();
+            
+            const data = JSON.parse(txt);
+
+            if (!res.ok) {
+                throw new Error(`Failed to create submission: ${txt}`);
             }
-        }).then(data => {
+
+            if (data.error) {
+                throw new Error(`Failed to create submission: ${data.error}`);
+            }
+
             window.location.href = `/sessions/${data.id}`;
-        }).catch(error => {
-            console.error('Error creating session:', error);
-            alert('Failed to create session. Please try again.');
-        }).finally(() => {
+        } catch (error) {
+            console.error('Error creating submission:', error);
+            alert('Failed to create submission. Please try again.\n' + (error as Error).message);
+        } finally {
             setLoading(false);
-        });
+        }
     };
 
     return (

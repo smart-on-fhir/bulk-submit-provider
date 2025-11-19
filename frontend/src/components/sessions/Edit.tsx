@@ -25,28 +25,36 @@ export default function EditSubmission() {
         setLoading(false);
     };
 
-    const handleSubmit = (sub: Partial<App.Submission>) => {
+    const handleSubmit = async (sub: Partial<App.Submission>) => {
         setSubmitting(true);
-        fetch(`/api/sessions/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(sub)
-        }).then(res => {
-            if (res.ok) {
-                return res.json();
-            } else {
-                throw new Error('Network response was not ok');
+        try {
+            const res = await fetch(`/api/sessions/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(sub)
+            });
+
+            const txt = await res.text();
+            
+            const data = JSON.parse(txt);
+
+            if (!res.ok) {
+                throw new Error(`Failed to update submission: ${txt}`);
             }
-        }).then(data => {
-            navigate(`/sessions/${id}`);
-        }).catch(error => {
-            console.error('Error updating session:', error);
-            alert('Failed to update session. Please try again.');
-        }).finally(() => {
+
+            if (data.error) {
+                throw new Error(`Failed to update submission: ${data.error}`);
+            }
+            
+            navigate(`/sessions/${data.id}`);
+            
+        } catch (error) {
+            console.error('Error updating submission:', error);
+            alert('Failed to update submission. Please try again.\n' + (error as Error).message);
             setSubmitting(false);
-        });
+        }
     };
 
     useEffect(() => {

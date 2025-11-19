@@ -8,6 +8,7 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
 }) {
     const [name, setName] = useState<string>(value?.name || '');
     const [destinationBaseUrl, setDestinationBaseUrl] = useState<string>(value?.destinationBaseUrl || '');
+    const [id, setId] = useState<string>(value?.id || '');
     const [submitter , setSubmitter ] = useState<string>(
         value?.submitter ?
             JSON.stringify(value.submitter, null, 2) : 
@@ -16,7 +17,7 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        onSubmit({ destinationBaseUrl, name, submitter: JSON.parse(submitter) });
+        onSubmit({ destinationBaseUrl, name, submitter: JSON.parse(submitter), id: id || undefined });
     };
 
     return (
@@ -52,7 +53,7 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
                         as well as the bulk-submit-status operation at <code>POST [base-url]/$bulk-submit-status</code>.
                     </div>
                 </div>
-                <div className="mb-2">
+                <div className="mb-5">
                     <label htmlFor="submitter" className="form-label fw-semibold text-primary-emphasis lh-sm">
                         Submitter
                         { (value?.status === 'in-progress' || value?.status === 'complete') && <span className="small text-danger fw-normal ms-2">
@@ -72,6 +73,23 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
                         The FHIR Identifier of the entity submitting the data.
                         You can edit this to match an identifier registered in
                         your data recipient.
+                    </div>
+                </div>
+                <div className="mb-2">
+                    <label htmlFor="id" className="form-label fw-semibold text-primary-emphasis lh-sm">
+                        Submission ID
+                    </label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="id"
+                        value={id}
+                        onChange={e => setId(e.target.value)}
+                        disabled={loading || value?.status === 'in-progress'}
+                    />
+                    <div className="small mt-1 text-secondary">
+                        A unique identifier for this submission. If you leave this empty,
+                        a new UUID will be generated for the submission.
                     </div>
                 </div>
                 <div className="text-center mt-5">
