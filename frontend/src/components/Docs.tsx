@@ -38,7 +38,7 @@ const MarkdownEmbed = () => {
   }, []);
 
   return (
-    <div className={ "markdown-container" + (markdown ? '' : ' text-center flex-grow-1 d-flex flex-column justify-content-center align-self-center') }>
+    <div className={ "markdown-container small" + (markdown ? '' : ' text-center flex-grow-1 d-flex flex-column justify-content-center align-self-center') }>
       <ReactMarkdown
         // Allow GitHub-flavored markdown (tables, task-lists, strikethrough)
         remarkPlugins={[remarkGfm]}

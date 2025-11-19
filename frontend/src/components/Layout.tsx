@@ -29,7 +29,7 @@ export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) =
       </header>
 
       <main className="flex-fill d-flex flex-column">
-        <div className="container py-4 h-100 d-flex flex-column">
+        <div className="container py-4 h-100 d-flex flex-column flex-fill">
           {children}
         </div>
       </main>
