@@ -25,7 +25,7 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
             <fieldset disabled={loading}>
                 <div className="mb-5">
                     <label htmlFor="name" className="form-label text-primary-emphasis fw-semibold">Submission Name</label>
-                    <input type="text" className="form-control" id="name" placeholder="My First Submission" value={name} onChange={e => setName(e.target.value)} />
+                    <input type="text" className="form-control" id="name" placeholder="Unnamed Bulk Submission" value={name} onChange={e => setName(e.target.value)} />
                     <div className="small mt-1 text-secondary">
                         A friendly name to help you identify this submission later.
                     </div>
@@ -37,6 +37,11 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
                             Cannot edit this while the submissions that are completed or in progress
                         </span> }
                     </label>
+                    <datalist id="urls">
+                        <option value="https://bulk-submit-recipient.smarthealthit.org">
+                            Bulk Submit Recipient Reference Implementation
+                        </option>
+                    </datalist>
                     <input
                         type="url"
                         className="form-control"
@@ -46,6 +51,7 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
                         value={destinationBaseUrl}
                         onChange={e => setDestinationBaseUrl(e.target.value)}
                         disabled={loading || value?.status === 'in-progress'}
+                        list="urls"
                     />
                     <div className="small mt-1 text-secondary">
                         The base URL of the server where the data will be submitted.

@@ -81,17 +81,23 @@ router.put('/api/sessions/:id', (req: Request, res: Response) => {
         if (!checkSubmissionOwnership(session, res)) {
             return;
         }
-        session.destinationBaseUrl = destinationBaseUrl;
-        session.submitter = submitter;
-        session.name = name;
+
+        if (destinationBaseUrl && destinationBaseUrl !== session.destinationBaseUrl) {
+            session.setDestinationBaseUrl(destinationBaseUrl);
+        }
+
+        if (submitter) {
+            session.setSubmitter(submitter);
+        }
+
+        if (name && name !== session.name) {
+            session.setName(name);
+        }
 
         if (newId && newId !== id) {
-            // change the ID
-            if (db.sessions.has(newId)) {
-                return res.status(400).json({ error: 'Submission with this ID already exists' });
-            }
-            db.sessions.delete(id);
-            (session as any).id = newId;
+            const oldId = session.id;
+            session.setId(newId);
+            db.sessions.delete(oldId);
         }
 
         session.save();
@@ -298,13 +304,10 @@ router.post('/api/sessions/:id/manifests/:index/abort', async (req: Request, res
 
     try {
         await session.abortManifestAt(+index);
-        // session.save();
-        // res.json(session);
-    } catch (error) {
-        console.error(error);
-    } finally {
         session.save();
         res.json(session);
+    } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
     }
 });
 
@@ -332,8 +335,7 @@ router.post('/api/sessions/:id/submit-manifest', async (req: Request, res: Respo
         session.save();
         res.json(session);
     } catch (error) {
-        console.error(error);
-        res.status(404).json({ error: (error as Error).message });
+        res.status(500).json({ error: (error as Error).message });
     }
 });
 
@@ -369,16 +371,10 @@ router.get('/api/manifests/:id', (req: Request, res: Response) => {
             delete manifest.request;
             manifest.transactionTime = new Date().toISOString();
             manifest.requiresAccessToken = false;
-            // manifest.outputOrganizedBy = "";
-            // manifest.deleted = [];
             manifest.output.forEach((file: any) => {
-
-                // Convert relative URLs to absolute for this folder
-                if (!file.url.match(/^https?:\/\//)) {
+                if (!file.url.match(/^https?:\/\//)) { // Relative to absolute
                     file.url = BASE_URL + `/exports/${id}/${file.url.split('/').pop()}`;
                 }
-                // file.url = new URL(`/exports/${id}/${basename(file.url)}`, BASE_URL).toString();
-                // delete file.destination;
             })
             return res.json(manifest);
         } catch (err) {
@@ -386,29 +382,7 @@ router.get('/api/manifests/:id', (req: Request, res: Response) => {
         }
     }
 
-    // Read the folder and collect the list of ndjson files
-    const files = readdirSync(exportPath).filter(file => file.endsWith('.ndjson'));
-    if (files.length === 0) {
-        return res.status(404).json({ error: 'No bulk files found' });
-    }
-
-    // Build the manifest
-    const baseUrl = `${req.protocol}://${req.get('host')}/exports/${id}`;
-    const manifest = {
-        transactionTime: new Date().toISOString(),
-        // request: `${baseUrl}/`,
-        requiresAccessToken: false,
-        // outputOrganizedBy: "",
-        // deleted: [],
-        // error: [],
-        output: files.map(file => ({
-            type : file.match(/^(\d+\.)?(.*?)\.ndjson$/)?.[2] || 'Resource',
-            url  : `${baseUrl}/${file}`,
-            count: countLinesInFile(path.join(exportPath, file)) // could count lines in file for more accuracy
-        }))
-    };
-
-    return res.json(manifest);
+    return res.status(404).json({ error: 'Manifest not found' });
 });
 
 // HackMD CORS proxy
@@ -423,11 +397,6 @@ router.get('/api/hack-md', async (req: Request, res: Response) => {
     res.status(500).send('Error fetching markdown');
   }
 });
-
-function countLinesInFile(filePath: string): number {
-    const data = readFileSync(filePath, 'utf-8');
-    return data.split('\n').length;
-}
 
 function checkSubmissionOwnership(session: Submission, res: Response): boolean {
     if (session.owner_id && session.owner_id !== res.locals.sessionId) {

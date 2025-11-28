@@ -17,7 +17,7 @@ export default class Submission
      * Unique identifier for the Submission. This ine is in fact editable by
      * the user (but then we have to make sure it's unique in the database).
      */
-    public id: string;
+    public id!: string;
 
     /**
      * The ID of the user who owns this submission
@@ -32,7 +32,7 @@ export default class Submission
     /**
      * The base URL to which the submission is sent
      */
-    public destinationBaseUrl: string;
+    public destinationBaseUrl!: string;
 
     /**
      * The time at which the submission was created
@@ -87,25 +87,57 @@ export default class Submission
     }) {
 
         if (id) {
-            if (db.sessions.has(id)) {
-                throw new Error('Submission with the new ID already exists');
-            }
-            this.id = id;
+            this.setId(id);
         } else {
-            this.id = uuidV4();
+            this.setId(uuidV4());
         }
 
-        this.destinationBaseUrl = destinationBaseUrl;
+        this.setDestinationBaseUrl(destinationBaseUrl);
         if (name) {
-            this.name = name;
+            this.setName(name);
         }
+
         if (submitter) {
-            this.submitter = submitter;
+            this.setSubmitter(submitter);
         }
+
         if (owner_id) {
             this.owner_id = owner_id;
         }
         this.log = new Log();
+    }
+    // Setters -----------------------------------------------------------------
+    setId(id: string) {
+        if (db.sessions.has(id)) {
+            throw new Error('Submission with the new ID already exists');
+        }
+        this.id = id;
+    }
+
+    setName(name: string) {
+        if (typeof name !== 'string') {
+            throw new Error('Submission name must be a string');
+        }
+        if (!name || name.trim().length === 0) {
+            throw new Error('Submission name cannot be empty');
+        }
+        this.name = name;
+    }
+
+    setDestinationBaseUrl(url: string) {
+        try {
+            new URL(url);
+        } catch (e) {
+            throw new Error('Invalid destinationBaseUrl');
+        }
+        this.destinationBaseUrl = url;
+    }
+
+    setSubmitter(submitter: App.Submitter) {
+        if (!submitter.system || !submitter.value) {
+            throw new Error('Submitter must have both system and value');
+        }
+        this.submitter = submitter;
     }
 
     get status(): App.Submission['status'] {
@@ -379,9 +411,9 @@ export default class Submission
         }
 
         const parameters: ParametersParameter[] = [
-            { name: 'submissionStatus', valueCoding: CODING_IN_PROGRESS },
-            { name: 'manifestUrl', valueString: manifestUrl },
-            { name: 'FHIRBaseUrl', valueString: manifest.FHIRBaseUrl },
+            { name: 'submissionStatus', valueCoding: CODING_IN_PROGRESS   },
+            { name: 'manifestUrl'     , valueString: manifestUrl          },
+            { name: 'FHIRBaseUrl'     , valueString: manifest.FHIRBaseUrl },
         ];
 
         if (manifest.outputFormat) {
@@ -405,11 +437,16 @@ export default class Submission
 
         const { error } = await this.bulkSubmitRequest(parameters);
 
-        if (!error) {
-            manifest.status = 'submitted';
-            if (!this.startedAt) {
-                this.startedAt = new Date();
-            }
+        if (error) {
+            throw error;
+        }
+
+        manifest.status = 'submitted';
+        if (!this.startedAt) {
+            this.startedAt = new Date();
+        }
+
+        if (process.env.NODE_ENV !== 'test') {
             await this.kickoffStatusPolling();
         }
 

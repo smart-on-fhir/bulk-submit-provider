@@ -36,8 +36,8 @@ export default function ManifestForm({
     const [manifestUrl       , setManifestUrl       ] = useState(replaceManifestUrl ? '' : job ? job.manifestUrl  : '');
     const [FHIRBaseUrl       , setFHIRBaseUrl       ] = useState(replaceManifestUrl ? '' : job ? job.FHIRBaseUrl  : '');
     const [outputFormat      , setOutputFormat      ] = useState(replaceManifestUrl ? '' : job ? job.outputFormat : '');
-    const [fileRequestHeaders, setFileRequestHeaders] = useState(replaceManifestUrl ? '' : job && job.fileRequestHeaders ?
-        job.fileRequestHeaders.map(h => `${h.headerName}: ${h.headerValue}`).join('\n') : ''
+    const [fileRequestHeaders, setFileRequestHeaders] = useState(replaceManifestUrl ? '' : job?.fileRequestHeaders?.length ?
+        job.fileRequestHeaders.map(h => h.headerName && h.headerValue ? `${h.headerName}: ${h.headerValue}` : '').join('\n') : ''
     );
 
     const title = replaceManifestUrl ?
@@ -51,12 +51,14 @@ export default function ManifestForm({
         { replaceManifestUrl ? 'Replace' : job ? 'Save' : 'Add' }
     </>;
 
+    const defaultBaseUrl = manifestUrl ? new URL(manifestUrl).origin : '';
+
     return (
         <form onSubmit={(e) => {
             e.preventDefault();
             onSubmit({
                 manifestUrl,
-                FHIRBaseUrl,
+                FHIRBaseUrl: FHIRBaseUrl || defaultBaseUrl,
                 outputFormat,
                 fileRequestHeaders: parseFileRequestHeaders(fileRequestHeaders)
             });
@@ -127,15 +129,14 @@ export default function ManifestForm({
                             <input
                                 type="url"
                                 className="form-control"
-                                required
-                                // placeholder="https://fhirserver.com/fhir"
+                                placeholder={defaultBaseUrl}
                                 value={FHIRBaseUrl}
                                 onChange={e=>setFHIRBaseUrl(e.target.value)}
                                 name='FHIRBaseUrl'
                             />
                             <div className="small mt-1 text-muted lh-sm opacity-75">
                                 Base url to be used by the Data Recipient when resolving relative references in
-                                the submitted resources.
+                                the submitted resources. Leave this empty to use the base URL of the manifest.
                             </div>
                         </div>
                         <div className="mb-3" style={{ breakInside: 'avoid' }}>

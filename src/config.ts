@@ -14,7 +14,7 @@ export const APP_BASE_URL = process.env.APP_BASE_URL || BASE_URL;
 export const NODE_ENV = process.env.NODE_ENV || 'production';
 
 // Throttle delay (ms) to delay every http response (for testing).
-export const THROTTLE = parseInt(process.env.THROTTLE || (NODE_ENV === 'production' ? '0' : '1000'), 10);
+export const THROTTLE = parseInt(process.env.THROTTLE || (NODE_ENV === 'development' ? '1000' : '0'), 10);
 
 // How long submissions are kept before being deleted (in hours)
 export const SUBMISSION_LIFETIME_HOURS = parseInt(process.env.SUBMISSION_LIFETIME_HOURS || '48', 10);
