@@ -3,6 +3,7 @@ import { Parameters, ParametersParameter } from 'fhir/r4';
 import db                                  from './db';
 import { Log }                             from './Log';
 import { formatDuration, sendRequest }     from './utils';
+import { createAuthenticator }             from './authenticator';
 import {
     BASE_URL,
     CODING_ABORTED,

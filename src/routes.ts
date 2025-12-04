@@ -4,10 +4,15 @@ import path                          from 'path';
 import Submission                    from './Submission';
 import db                            from './db';
 import { getErrorMessage }           from './utils';
-import { BASE_URL, THROTTLE }        from './config';
+import { createAuthenticator }       from './authenticator';
+import {
+    BASE_URL,
+    PRIVATE_KEY,
+    PUBLIC_KEY,
+    THROTTLE
+} from './config';
 import {
     existsSync,
-    readdirSync,
     readFileSync,
     statSync
 } from 'fs';
@@ -48,7 +53,7 @@ router.get('/api/sessions', (req: Request, res: Response) => {
 // Create new Submission
 router.post('/api/sessions', (req: Request, res: Response) => {
     try {
-        const { destinationBaseUrl, name, submitter, id, clientId, authType } = req.body;
+        const { destinationBaseUrl, name, submitter, id, clientId, authType, tokenUrl } = req.body;
         if (!destinationBaseUrl) {
             return res.status(400).json({ error: 'Missing destinationBaseUrl' });
         }
@@ -58,12 +63,13 @@ router.post('/api/sessions', (req: Request, res: Response) => {
             submitter,
             owner_id: res.locals.sessionId,
             clientId,
+            tokenUrl,
             authType: authType as any || 'none',
             id
         }).save();
         res.status(201).json(session);
     } catch (err) {
-        console.error(err);
+        // console.error(err);
         res.status(500).json({ error: getErrorMessage(err) });
     }
 });
@@ -72,7 +78,7 @@ router.post('/api/sessions', (req: Request, res: Response) => {
 router.put('/api/sessions/:id', (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { destinationBaseUrl, submitter, name, id: newId, clientId, authType } = req.body;
+        const { destinationBaseUrl, submitter, name, id: newId, clientId, authType, tokenUrl } = req.body;
         if (!destinationBaseUrl) {
             return res.status(400).json({ error: 'Missing destinationBaseUrl' });
         }
@@ -102,6 +108,10 @@ router.put('/api/sessions/:id', (req: Request, res: Response) => {
 
         if (authType && authType !== session.authType) {
             session.setAuthType(authType);
+        }
+
+        if (tokenUrl && tokenUrl !== session.tokenUrl) {
+            session.setTokenUrl(tokenUrl);
         }
 
         if (newId && newId !== id) {
@@ -406,6 +416,35 @@ router.get('/api/hack-md', async (req: Request, res: Response) => {
   } catch (err) {
     res.status(500).send('Error fetching markdown');
   }
+});
+
+// Auth endpoints --------------------------------------------------------------
+router.get('/keys', (req, res) => {
+    res.json({ keys: [ PUBLIC_KEY ] });
+});
+
+router.post('/auth/verify', async (req, res) => {
+    const { client_id, token_url } = req.body;
+
+    if (!client_id) {
+        return res.status(400).json({ error: 'Missing client_id parameter' });
+    }
+
+    if (!token_url) {
+        return res.status(400).json({ error: 'Missing token_url parameter' });
+    }
+
+    try {
+        const getAccessToken = createAuthenticator({
+            tokenUrl  : token_url,
+            clientId  : client_id,
+            privateKey: PRIVATE_KEY
+        });
+        const tokenResponse = await getAccessToken();
+        res.json({ token: tokenResponse });
+    } catch (error) {
+        res.status(500).json({ error: (error as Error).message });
+    }
 });
 
 function checkSubmissionOwnership(session: Submission, res: Response): boolean {
