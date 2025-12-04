@@ -7,7 +7,8 @@ import {
     BASE_URL,
     CODING_ABORTED,
     CODING_COMPLETE,
-    CODING_IN_PROGRESS
+    CODING_IN_PROGRESS,
+    PRIVATE_KEY
 } from './config';
 
 
@@ -39,6 +40,8 @@ export default class Submission
      * stored here for use in authentication.
      */
     public clientId = '';
+
+    public tokenUrl = '';
 
     /**
      * The authentication type to use when sending requests to the recipient
@@ -83,6 +86,8 @@ export default class Submission
 
     private aborted = false;
 
+    private getAccessToken: () => Promise<string | null>;
+
     public constructor({
         destinationBaseUrl,
         name,
@@ -90,6 +95,7 @@ export default class Submission
         owner_id,
         id,
         clientId,
+        tokenUrl,
         authType = 'none'
     } : {
         destinationBaseUrl: string
@@ -98,6 +104,7 @@ export default class Submission
         owner_id?: string
         id?: string
         clientId?: string,
+        tokenUrl?: string,
         authType?: 'none' | 'basic' | 'bearer'
     }) {
 
@@ -126,8 +133,15 @@ export default class Submission
         }
 
         this.clientId = clientId || '';
+        this.tokenUrl = tokenUrl || '';
 
         this.log = new Log();
+
+        this.getAccessToken = createAuthenticator({
+            tokenUrl: this.tokenUrl,
+            clientId: this.clientId,
+            privateKey: PRIVATE_KEY
+        });
     }
 
     // Setters -----------------------------------------------------------------
@@ -173,6 +187,10 @@ export default class Submission
             throw new Error('Invalid authType. Expected one of: none, basic, bearer');
         }
         this.authType = authType;
+    }
+
+    setTokenUrl(tokenUrl: string) {
+        this.tokenUrl = tokenUrl;
     }
 
     // Getters -----------------------------------------------------------------
@@ -221,7 +239,10 @@ export default class Submission
             progress          : this.progress,
             manifests         : this.manifests,
             log               : this.log.toJSON(),
-            result            : this.statusDetails
+            result            : this.statusDetails,
+            authType          : this.authType,
+            clientId          : this.clientId,
+            tokenUrl          : this.tokenUrl
         };
     }
 
@@ -404,9 +425,12 @@ export default class Submission
                 });
             }
             else if (this.authType === 'bearer') {
-                Object.assign(_options.headers ??= {}, {
-                    'Authorization': `Bearer ${this.clientId}`
-                });
+                const accessToken = await this.getAccessToken();
+                if (accessToken) {
+                    Object.assign(_options.headers ??= {}, {
+                        'Authorization': `Bearer ${accessToken}`
+                    });
+                }
             }
         }
         return await sendRequest(url, _options);
