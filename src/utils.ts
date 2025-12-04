@@ -136,13 +136,12 @@ export async function sendRequest(url: string | URL | Request, options?: Request
         }
 
         if (!out.res.ok) {
-            out.error  = out.res.status + " " + out.res.statusText;
+            out.error  = out.res.status + " " + out.res.statusText + " " + JSON.stringify(out.response.body);
         } else {
             out.error  = null;
         }
 
     } catch (err) {
-        console.error(err);
         out.error = getErrorMessage(err);
     }
     
