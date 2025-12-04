@@ -38,6 +38,9 @@ declare global {
             progress: number;
             log: JobLogEntry[];
             manifests: SubmissionManifest[];
+            authType: 'none' | 'basic' | 'bearer';
+            clientId?: string;
+            tokenUrl?: string;
             result: null | {
                 startedAt  : string
                 completedAt: string
@@ -49,7 +52,7 @@ declare global {
 
         interface SubmissionManifest {
             manifestUrl: string;
-            FHIRBaseUrl: string;
+            fhirBaseUrl: string;
             status: 'not-started' | 'submitting' | 'submitted' | 'aborted' | 'failed' | 'replaced';
             startedAt: string | null;
             completedAt: string | null;

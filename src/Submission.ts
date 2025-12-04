@@ -35,6 +35,17 @@ export default class Submission
     public destinationBaseUrl!: string;
 
     /**
+     * If the provider is registered with the recipient, the client ID can be
+     * stored here for use in authentication.
+     */
+    public clientId = '';
+
+    /**
+     * The authentication type to use when sending requests to the recipient
+     */
+    public authType: 'none' | 'basic' | 'bearer' = 'none';
+
+    /**
      * The time at which the submission was created
      */
     public readonly createdAt: Date = new Date();
@@ -77,13 +88,17 @@ export default class Submission
         name,
         submitter,
         owner_id,
-        id
+        id,
+        clientId,
+        authType = 'none'
     } : {
         destinationBaseUrl: string
         name?: string
         submitter?: App.Submitter
         owner_id?: string
         id?: string
+        clientId?: string,
+        authType?: 'none' | 'basic' | 'bearer'
     }) {
 
         if (id) {
@@ -93,6 +108,11 @@ export default class Submission
         }
 
         this.setDestinationBaseUrl(destinationBaseUrl);
+        
+        if (authType) {
+            this.setAuthType(authType);
+        }
+
         if (name) {
             this.setName(name);
         }
@@ -104,8 +124,12 @@ export default class Submission
         if (owner_id) {
             this.owner_id = owner_id;
         }
+
+        this.clientId = clientId || '';
+
         this.log = new Log();
     }
+
     // Setters -----------------------------------------------------------------
     setId(id: string) {
         if (db.sessions.has(id)) {
@@ -139,6 +163,19 @@ export default class Submission
         }
         this.submitter = submitter;
     }
+
+    setClientId(clientId: string) {
+        this.clientId = clientId;
+    }
+
+    setAuthType(authType: 'none' | 'basic' | 'bearer') {
+        if (!['none', 'basic', 'bearer'].includes(authType)) {
+            throw new Error('Invalid authType. Expected one of: none, basic, bearer');
+        }
+        this.authType = authType;
+    }
+
+    // Getters -----------------------------------------------------------------
 
     get status(): App.Submission['status'] {
         if (this.aborted) {
@@ -355,9 +392,28 @@ export default class Submission
     }
 
     ////////////////////////////////////////////////////////////////////////////
+    // Request methods
+    ////////////////////////////////////////////////////////////////////////////
+
+    async sendRequest(url: string | URL | Request, options: RequestInit = {}) {
+        const _options = { ...options };
+        if (this.clientId) {
+            if (this.authType === 'basic') {
+                Object.assign(_options.headers ??= {}, {
+                    'Authorization': `Basic ${Buffer.from(this.clientId).toString('base64')}`
+                });
+            }
+            else if (this.authType === 'bearer') {
+                Object.assign(_options.headers ??= {}, {
+                    'Authorization': `Bearer ${this.clientId}`
+                });
+            }
+        }
+        return await sendRequest(url, _options);
+    }
 
     async bulkSubmitRequest(parameters: ParametersParameter[] = []) {
-        const result = await sendRequest(
+        const result = await this.sendRequest(
             `${this.destinationBaseUrl}/$bulk-submit`, {
             method: 'POST',
             headers: {
@@ -464,7 +520,7 @@ export default class Submission
      * submission is initiated.
      */
     async getStatusLocation(): Promise<string> {
-        const { error, request, response } = await sendRequest(`${this.destinationBaseUrl}/$bulk-submit-status`, {
+        const { error, request, response } = await this.sendRequest(`${this.destinationBaseUrl}/$bulk-submit-status`, {
             method : 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -538,7 +594,7 @@ export default class Submission
             return this;
         }
 
-        const { res, response, request, error } = await sendRequest(statusUrl)
+        const { res, response, request, error } = await this.sendRequest(statusUrl)
 
         const msg = res?.status === 200 ?
             `Status: got ${res?.status} ${res?.statusText}. Submission is now complete!` :

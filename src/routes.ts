@@ -48,7 +48,7 @@ router.get('/api/sessions', (req: Request, res: Response) => {
 // Create new Submission
 router.post('/api/sessions', (req: Request, res: Response) => {
     try {
-        const { destinationBaseUrl, name, submitter, id } = req.body;
+        const { destinationBaseUrl, name, submitter, id, clientId, authType } = req.body;
         if (!destinationBaseUrl) {
             return res.status(400).json({ error: 'Missing destinationBaseUrl' });
         }
@@ -57,6 +57,8 @@ router.post('/api/sessions', (req: Request, res: Response) => {
             name,
             submitter,
             owner_id: res.locals.sessionId,
+            clientId,
+            authType: authType as any || 'none',
             id
         }).save();
         res.status(201).json(session);
@@ -70,7 +72,7 @@ router.post('/api/sessions', (req: Request, res: Response) => {
 router.put('/api/sessions/:id', (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { destinationBaseUrl, submitter, name, id: newId } = req.body;
+        const { destinationBaseUrl, submitter, name, id: newId, clientId, authType } = req.body;
         if (!destinationBaseUrl) {
             return res.status(400).json({ error: 'Missing destinationBaseUrl' });
         }
@@ -92,6 +94,14 @@ router.put('/api/sessions/:id', (req: Request, res: Response) => {
 
         if (name && name !== session.name) {
             session.setName(name);
+        }
+
+        if (clientId && clientId !== session.clientId) {
+            session.setClientId(clientId);
+        }
+
+        if (authType && authType !== session.authType) {
+            session.setAuthType(authType);
         }
 
         if (newId && newId !== id) {
