@@ -410,15 +410,15 @@ router.get('/api/manifests/:id', (req: Request, res: Response) => {
 
 // HackMD CORS proxy
 router.get('/api/hack-md', async (req: Request, res: Response) => {
-  const url = 'https://hackmd.io/@argonaut/Sy7wjS81Wg.md';
-  try {
-    const response = await fetch(url);
-    const text = await response.text();
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.send(text);
-  } catch (err) {
-    res.status(500).send('Error fetching markdown');
-  }
+    const url = 'https://hackmd.io/@argonaut/rJoqHZrPle.md';
+    try {
+        const response = await fetch(url);
+        const text = await response.text();
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.send(text);
+    } catch (err) {
+        res.status(500).send('Error fetching markdown');
+    }
 });
 
 // Auth endpoints --------------------------------------------------------------

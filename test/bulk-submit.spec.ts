@@ -30,7 +30,7 @@ describe('Bulk Submit Provider API Requests', () => {
           .get('/api/hack-md')
           .expect(200)
           .expect(res => {
-              expect(res.text).to.include('# FHIR Bulk Publish Operation');
+              expect(res.text).to.include('Bulk Submit');
           });
     });
 
