@@ -30,6 +30,11 @@ export default defineConfig(async () => {
           // keep /api prefix so frontend requests to /api/... map directly
           // to the backend's same path
         },
+        '/auth': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
   };
