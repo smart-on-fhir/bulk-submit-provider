@@ -206,9 +206,9 @@ router.post('/api/sessions/:id/abort', async (req: Request, res: Response) => {
 // Add manifest
 router.post('/api/sessions/:id/manifests', (req: Request, res: Response) => {
     const { id } = req.params;
-    const { manifestUrl, outputFormat, FHIRBaseUrl, fileRequestHeaders } = req.body;
-    if (!manifestUrl || !FHIRBaseUrl) {
-        return res.status(400).json({ error: 'Missing manifestUrl or FHIRBaseUrl' });
+    const { manifestUrl, outputFormat, fhirBaseUrl, fileRequestHeaders } = req.body;
+    if (!manifestUrl || !fhirBaseUrl) {
+        return res.status(400).json({ error: 'Missing manifestUrl or fhirBaseUrl' });
     }
     const session = db.sessions.get(id);
     if (!session) {
@@ -219,7 +219,7 @@ router.post('/api/sessions/:id/manifests', (req: Request, res: Response) => {
         return;
     }
 
-    session.addJob({ manifestUrl, FHIRBaseUrl, outputFormat, fileRequestHeaders });
+    session.addJob({ manifestUrl, fhirBaseUrl, outputFormat, fileRequestHeaders });
     session.save();
     res.json(session);
 });
@@ -231,7 +231,7 @@ router.put('/api/sessions/:id/manifests/:index', (req: Request, res: Response) =
     const {
         manifestUrl,
         outputFormat,
-        FHIRBaseUrl,
+        fhirBaseUrl,
         fileRequestHeaders
     } = req.body;
 
@@ -249,7 +249,7 @@ router.put('/api/sessions/:id/manifests/:index', (req: Request, res: Response) =
         return res.status(404).json({ error: 'Manifest not found' });
     }
     if (manifestUrl)        manifest.manifestUrl        = manifestUrl;
-    if (FHIRBaseUrl)        manifest.FHIRBaseUrl        = FHIRBaseUrl;
+    if (fhirBaseUrl)        manifest.fhirBaseUrl        = fhirBaseUrl;
     if (outputFormat)       manifest.outputFormat       = outputFormat;
     if (fileRequestHeaders) manifest.fileRequestHeaders = fileRequestHeaders;
 
@@ -277,7 +277,7 @@ router.delete('/api/sessions/:id/manifests/:index', (req: Request, res: Response
 // Replace manifest
 router.post('/api/sessions/:id/manifests/:index/replace', async (req: Request, res: Response) => {
     const { id, index } = req.params;
-    const { newManifestUrl, FHIRBaseUrl, outputFormat, fileRequestHeaders } = req.body;
+    const { newManifestUrl, fhirBaseUrl, outputFormat, fileRequestHeaders } = req.body;
 
     if (!newManifestUrl) {
         return res.status(400).json({ error: 'Missing newManifestUrl parameter' });
@@ -294,7 +294,7 @@ router.post('/api/sessions/:id/manifests/:index/replace', async (req: Request, r
 
     try {
         await session.replaceManifestAt(+index, {
-            FHIRBaseUrl,
+            fhirBaseUrl,
             manifestUrl: newManifestUrl,
             outputFormat,
             fileRequestHeaders

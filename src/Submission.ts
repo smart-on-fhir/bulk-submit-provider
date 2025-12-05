@@ -260,12 +260,12 @@ export default class Submission
 
     addJob({
         manifestUrl,
-        FHIRBaseUrl,
+        fhirBaseUrl,
         outputFormat,
         fileRequestHeaders
     }: {
         manifestUrl: string
-        FHIRBaseUrl: string
+        fhirBaseUrl: string
         outputFormat?: string
         fileRequestHeaders?: App.HeaderDescriptor[]
     }) {
@@ -276,7 +276,7 @@ export default class Submission
 
         this.manifests.push({
             manifestUrl,
-            FHIRBaseUrl,
+            fhirBaseUrl,
             status: 'not-started',
             startedAt: null,
             completedAt: null,
@@ -316,7 +316,7 @@ export default class Submission
      */
     async replaceManifest(manifest: App.SubmissionManifest, newManifest: {
         manifestUrl: string,
-        FHIRBaseUrl: string,
+        fhirBaseUrl: string,
         outputFormat?: string,
         fileRequestHeaders?: App.HeaderDescriptor[]
     }) {
@@ -326,9 +326,9 @@ export default class Submission
         );
 
         const parameters: ParametersParameter[] = [
-            { name: 'submissionStatus', valueCoding: CODING_IN_PROGRESS },
-            { name: 'manifestUrl', valueString: newManifest.manifestUrl },
-            { name: 'FHIRBaseUrl', valueString: newManifest.FHIRBaseUrl },
+            { name: 'submissionStatus'   , valueCoding: CODING_IN_PROGRESS },
+            { name: 'manifestUrl'        , valueString: newManifest.manifestUrl },
+            { name: 'fhirBaseUrl'        , valueString: newManifest.fhirBaseUrl },
             { name: 'replacesManifestUrl', valueString: manifest.manifestUrl }
         ];
 
@@ -358,7 +358,7 @@ export default class Submission
 
         this.addJob({
             manifestUrl: newManifest.manifestUrl,
-            FHIRBaseUrl: newManifest.FHIRBaseUrl
+            fhirBaseUrl: newManifest.fhirBaseUrl
         });
 
         this.save();
@@ -371,7 +371,7 @@ export default class Submission
      */
     async replaceManifestAt(index: number, newManifest: {
         manifestUrl: string,
-        FHIRBaseUrl: string,
+        fhirBaseUrl: string,
         outputFormat?: string,
         fileRequestHeaders?: App.HeaderDescriptor[]
     }) {
@@ -404,7 +404,7 @@ export default class Submission
         const { error } = await this.bulkSubmitRequest([
             { name: 'submissionStatus', valueCoding: CODING_IN_PROGRESS },
             { name: 'manifestUrl', valueString: `${BASE_URL}/api/manifests/empty` },
-            { name: 'FHIRBaseUrl', valueString: job.FHIRBaseUrl },
+            { name: 'fhirBaseUrl', valueString: job.fhirBaseUrl },
             { name: 'replacesManifestUrl', valueString: job.manifestUrl }
         ]);
         if (!error) {
@@ -494,7 +494,7 @@ export default class Submission
         const parameters: ParametersParameter[] = [
             { name: 'submissionStatus', valueCoding: CODING_IN_PROGRESS   },
             { name: 'manifestUrl'     , valueString: manifestUrl          },
-            { name: 'FHIRBaseUrl'     , valueString: manifest.FHIRBaseUrl },
+            { name: 'fhirBaseUrl'     , valueString: manifest.fhirBaseUrl },
         ];
 
         if (manifest.outputFormat) {

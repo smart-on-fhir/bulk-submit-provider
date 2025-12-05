@@ -26,7 +26,7 @@ export default function ManifestForm({
     replaceManifestUrl?: string,
     onSubmit(data: {
         manifestUrl: string,
-        FHIRBaseUrl: string,
+        fhirBaseUrl: string,
         outputFormat?: string,
         fileRequestHeaders: App.HeaderDescriptor[]
     }): void
@@ -34,7 +34,7 @@ export default function ManifestForm({
 }) {
     const job = manifestIndex !== undefined ? session.manifests[manifestIndex] : undefined;
     const [manifestUrl       , setManifestUrl       ] = useState(replaceManifestUrl ? '' : job ? job.manifestUrl  : '');
-    const [FHIRBaseUrl       , setFHIRBaseUrl       ] = useState(replaceManifestUrl ? '' : job ? job.FHIRBaseUrl  : '');
+    const [fhirBaseUrl       , setFHIRBaseUrl       ] = useState(replaceManifestUrl ? '' : job ? job.fhirBaseUrl  : '');
     const [outputFormat      , setOutputFormat      ] = useState(replaceManifestUrl ? '' : job ? job.outputFormat : '');
     const [fileRequestHeaders, setFileRequestHeaders] = useState(replaceManifestUrl ? '' : job?.fileRequestHeaders?.length ?
         job.fileRequestHeaders.map(h => h.headerName && h.headerValue ? `${h.headerName}: ${h.headerValue}` : '').join('\n') : ''
@@ -58,7 +58,7 @@ export default function ManifestForm({
             e.preventDefault();
             onSubmit({
                 manifestUrl,
-                FHIRBaseUrl: FHIRBaseUrl || defaultBaseUrl,
+                fhirBaseUrl: fhirBaseUrl || defaultBaseUrl,
                 outputFormat,
                 fileRequestHeaders: parseFileRequestHeaders(fileRequestHeaders)
             });
@@ -130,9 +130,9 @@ export default function ManifestForm({
                                 type="url"
                                 className="form-control"
                                 placeholder={defaultBaseUrl}
-                                value={FHIRBaseUrl}
+                                value={fhirBaseUrl}
                                 onChange={e=>setFHIRBaseUrl(e.target.value)}
-                                name='FHIRBaseUrl'
+                                name='fhirBaseUrl'
                             />
                             <div className="small mt-1 text-muted lh-sm opacity-75">
                                 Base url to be used by the Data Recipient when resolving relative references in

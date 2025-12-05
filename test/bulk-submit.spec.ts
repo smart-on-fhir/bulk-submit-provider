@@ -432,7 +432,7 @@ describe('Bulk Submit Provider API Requests', () => {
             destinationBaseUrl: 'http://localhost:3333',
             name: 'Example Bulk Submission'
         });
-        submission.addJob({ manifestUrl: 'http://localhost:3333/manifest.json', FHIRBaseUrl: 'http://fhirserver' });
+        submission.addJob({ manifestUrl: 'http://localhost:3333/manifest.json', fhirBaseUrl: 'http://fhirserver' });
         db.sessions.set(submission.id, submission);
         const app = createApp();
         await request(app)
@@ -453,7 +453,7 @@ describe('Bulk Submit Provider API Requests', () => {
             destinationBaseUrl: 'http://localhost:3333',
             name: 'Example Bulk Submission'
         });
-        submission.addJob({ manifestUrl: 'http://localhost:3333/manifest.json', FHIRBaseUrl: 'http://fhirserver' });
+        submission.addJob({ manifestUrl: 'http://localhost:3333/manifest.json', fhirBaseUrl: 'http://fhirserver' });
         db.sessions.set(submission.id, submission);
         const app = createApp();
         await request(app)
@@ -561,7 +561,7 @@ describe('Bulk Submit Provider API Requests', () => {
         });
         submission.addJob({
             manifestUrl: 'http://example.org/manifest.json',
-            FHIRBaseUrl: 'http://fhirserver'
+            fhirBaseUrl: 'http://fhirserver'
         });
         db.sessions.set(submission.id, submission);
         const app = createApp();

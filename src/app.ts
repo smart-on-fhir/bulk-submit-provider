@@ -17,11 +17,11 @@ export default function createApp() {
     // Serve static files in /exports
     const exportsDir = path.resolve(__dirname, '..', 'exports');
     app.use('/exports', express.static(exportsDir, {
-      setHeaders(res, path, stat) {
-        if (stat.isFile() && path.endsWith('.ndjson')) {
-          res.set('Content-Type', 'application/ndjson');
+        setHeaders(res, path, stat) {
+            if (stat.isFile() && path.endsWith('.ndjson')) {
+                res.set('Content-Type', 'application/ndjson');
+            }
         }
-      }
     }));
 
     // SPA fallback — serve index.html for non-API routes

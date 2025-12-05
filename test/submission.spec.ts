@@ -55,7 +55,7 @@ describe('Submission.submitManifest', () => {
         
         submission.addJob({
             manifestUrl: 'http://example.org/manifest1',
-            FHIRBaseUrl: 'http://fhir.example.org'
+            fhirBaseUrl: 'http://fhir.example.org'
         });
 
         await submission.submitManifest('http://example.org/manifest1');
@@ -84,8 +84,8 @@ describe('Submission.submitManifest', () => {
         expect(manifestParam).to.exist;
         expect(manifestParam.valueString).to.equal('http://example.org/manifest1');
 
-        // Check the FHIRBaseUrl parameter
-        const fhirParam = params.find((p: any) => p.name === 'FHIRBaseUrl');
+        // Check the fhirBaseUrl parameter
+        const fhirParam = params.find((p: any) => p.name === 'fhirBaseUrl');
         expect(fhirParam).to.exist;
         expect(fhirParam.valueString).to.equal('http://fhir.example.org');
 
@@ -109,7 +109,7 @@ describe('Submission.submitManifest', () => {
 
         submission.addJob({
             manifestUrl : 'http://example.org/manifest2',
-            FHIRBaseUrl : 'http://fhir2',
+            fhirBaseUrl : 'http://fhir2',
             outputFormat: 'application/fhir+ndjson'
         });
 
@@ -138,7 +138,7 @@ describe('Submission.submitManifest', () => {
         
         submission.addJob({
             manifestUrl: 'http://example.org/manifest3',
-            FHIRBaseUrl: 'http://fhir3',
+            fhirBaseUrl: 'http://fhir3',
             fileRequestHeaders: [
                 { headerName: 'Authorization', headerValue: 'Bearer token' },
                 { headerName: 'Custom-Header', headerValue: 'value' }
