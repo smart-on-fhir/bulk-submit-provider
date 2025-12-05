@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import 'dotenv/config';
 
 // The port where the Express app runs
@@ -42,3 +43,5 @@ if (!process.env.PUBLIC_KEY || !process.env.PRIVATE_KEY) {
 
 export const PUBLIC_KEY  = JSON.parse(process.env.PUBLIC_KEY);
 export const PRIVATE_KEY = JSON.parse(process.env.PRIVATE_KEY);
+
+export const BASIC_SECRET = randomBytes(32).toString('base64');

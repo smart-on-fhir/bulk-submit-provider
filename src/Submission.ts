@@ -6,6 +6,7 @@ import { formatDuration, sendRequest }     from './utils';
 import { createAuthenticator }             from './authenticator';
 import {
     BASE_URL,
+    BASIC_SECRET,
     CODING_ABORTED,
     CODING_COMPLETE,
     CODING_IN_PROGRESS,
@@ -47,7 +48,7 @@ export default class Submission
     /**
      * The authentication type to use when sending requests to the recipient
      */
-    public authType: 'none' | 'basic' | 'bearer' = 'none';
+    public authType: 'none' | 'bearer' = 'none';
 
     /**
      * The time at which the submission was created
@@ -106,7 +107,7 @@ export default class Submission
         id?: string
         clientId?: string,
         tokenUrl?: string,
-        authType?: 'none' | 'basic' | 'bearer'
+        authType?: 'none' | 'bearer'
     }) {
 
         if (id) {
@@ -183,9 +184,9 @@ export default class Submission
         this.clientId = clientId;
     }
 
-    setAuthType(authType: 'none' | 'basic' | 'bearer') {
-        if (!['none', 'basic', 'bearer'].includes(authType)) {
-            throw new Error('Invalid authType. Expected one of: none, basic, bearer');
+    setAuthType(authType: 'none' | 'bearer') {
+        if (!['none', 'bearer'].includes(authType)) {
+            throw new Error('Invalid authType. Expected one of: none, bearer');
         }
         this.authType = authType;
     }
@@ -337,16 +338,7 @@ export default class Submission
         }
 
         if (newManifest.fileRequestHeaders && newManifest.fileRequestHeaders.length > 0) {
-            parameters.push({
-                name: 'fileRequestHeaders',
-                part: newManifest.fileRequestHeaders.map(header => ({
-                    name: 'headerName',
-                    valueString: header.headerName
-                })).concat(newManifest.fileRequestHeaders.map(header => ({
-                    name: 'headerValue',
-                    valueString: header.headerValue
-                })))
-            });
+            newManifest.fileRequestHeaders.forEach(header => parameters.push(this.fileRequestHeaderToParameter(header)));
         }
 
         const { error } = await this.bulkSubmitRequest(parameters);
@@ -419,19 +411,12 @@ export default class Submission
 
     async sendRequest(url: string | URL | Request, options: RequestInit = {}) {
         const _options = { ...options };
-        if (this.clientId) {
-            if (this.authType === 'basic') {
+        if (this.clientId && this.authType === 'bearer') {
+            const accessToken = await this.getAccessToken();
+            if (accessToken) {
                 Object.assign(_options.headers ??= {}, {
-                    'Authorization': `Basic ${Buffer.from(this.clientId).toString('base64')}`
+                    'Authorization': `Bearer ${accessToken}`
                 });
-            }
-            else if (this.authType === 'bearer') {
-                const accessToken = await this.getAccessToken();
-                if (accessToken) {
-                    Object.assign(_options.headers ??= {}, {
-                        'Authorization': `Bearer ${accessToken}`
-                    });
-                }
             }
         }
         return await sendRequest(url, _options);
@@ -483,6 +468,23 @@ export default class Submission
         return result;
     }
 
+    private fileRequestHeaderToParameter(header: App.HeaderDescriptor): ParametersParameter {
+        const headerName = header.headerName.trim().toLowerCase();
+        const headerValue = header.headerValue.trim().toLowerCase();
+        return {
+            name: 'fileRequestHeader',
+            part: [{
+                name: 'headerName',
+                valueString: headerName
+            },{
+                name: 'headerValue',
+                valueString: headerName === "authorization" && headerValue === 'basic <secret>' ?
+                    `Basic ${BASIC_SECRET}` :
+                    headerValue
+            }]
+        };
+    }
+
     async submitManifest(manifestUrl: string) {
         this.log.add(`Submitting manifest ${JSON.stringify(manifestUrl)}...`);
 
@@ -502,18 +504,7 @@ export default class Submission
         }
 
         if (manifest.fileRequestHeaders && manifest.fileRequestHeaders.length > 0) {
-            manifest.fileRequestHeaders.forEach(header => {
-               parameters.push({
-                   name: 'fileRequestHeader',
-                   part: [{
-                       name: 'headerName',
-                       valueString: header.headerName
-                   },{
-                       name: 'headerValue',
-                       valueString: header.headerValue
-                   }]
-               });
-           });
+            manifest.fileRequestHeaders.forEach(header => parameters.push(this.fileRequestHeaderToParameter(header)));
         }
 
         const { error } = await this.bulkSubmitRequest(parameters);
