@@ -1,3 +1,4 @@
+import 'dotenv/config';
 
 // The port where the Express app runs
 export const PORT = process.env.PORT || '3000';
@@ -34,3 +35,10 @@ export const CODING_ABORTED: App.SubmissionStatusCoding = {
     system: 'http://hl7.org/fhir/uv/bulkdata/ValueSet/submission-status',
     code  : 'aborted'
 };
+
+if (!process.env.PUBLIC_KEY || !process.env.PRIVATE_KEY) {
+    throw new Error('PUBLIC_KEY and/or PRIVATE_KEY environment variables are not set!');
+}
+
+export const PUBLIC_KEY  = JSON.parse(process.env.PUBLIC_KEY);
+export const PRIVATE_KEY = JSON.parse(process.env.PRIVATE_KEY);

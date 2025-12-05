@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import db                           from './db';
 import createApp                    from './app';
 import Submission                   from './Submission';
