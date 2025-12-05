@@ -436,10 +436,13 @@ describe('Bulk Submit Provider API Requests', () => {
         db.sessions.set(submission.id, submission);
         const app = createApp();
         await request(app)
-          .post(`/api/sessions/${submission.id}/submit-manifest`)
-          .send({ manifestUrl: 'http://localhost:3333/manifest.json' })
-          .expect('content-type', /application\/json/)
-          .expect(500);
+            .post(`/api/sessions/${submission.id}/submit-manifest`)
+            .send({ manifestUrl: 'http://localhost:3333/manifest.json' })
+            .expect('content-type', /application\/json/)
+            .expect(res => {
+                const submission = res.body as App.Submission;
+                expect(submission.log.some(entry => entry.message.includes('Bulk Submit request failed!'))).to.be.true;
+            });
     });
 
     it ('Add Manifest - works', async () => {

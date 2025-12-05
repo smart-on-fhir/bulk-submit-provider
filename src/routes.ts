@@ -352,11 +352,14 @@ router.post('/api/sessions/:id/submit-manifest', async (req: Request, res: Respo
     
     try {
         await session.submitManifest(manifestUrl);
-        session.save();
-        res.json(session);
     } catch (error) {
-        res.status(500).json({ error: (error as Error).message });
+        session.log.add(`Failed to submit manifest ${manifestUrl}: ${getErrorMessage(error)}`, {
+            level: 'error',
+            details: (error as Error).stack
+        });
     }
+    session.save();
+    res.json(session);
 });
 
 // Hosting endpoints -----------------------------------------------------------
