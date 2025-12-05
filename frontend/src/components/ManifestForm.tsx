@@ -1,16 +1,6 @@
 import { useState } from "react";
+import HeadersGrid  from "./HeadersGrid";
 
-
-function parseFileRequestHeaders(headers: string): App.HeaderDescriptor[] {
-    return headers
-        .trim()
-        .split(/\s*\n\s*/)
-        .map(line => line.split(/\s*\:\s*/).map(s => s.trim()))
-        .reduce((acc, [key, value]) => {
-            acc.push({ headerName: key, headerValue: value });
-            return acc;
-        }, [] as App.HeaderDescriptor[]);
-}
 
 export default function ManifestForm({
     session,
@@ -32,13 +22,13 @@ export default function ManifestForm({
     }): void
     close(): void
 }) {
+    // The job being edited, if any
     const job = manifestIndex !== undefined ? session.manifests[manifestIndex] : undefined;
-    const [manifestUrl       , setManifestUrl       ] = useState(replaceManifestUrl ? '' : job ? job.manifestUrl  : '');
-    const [fhirBaseUrl       , setFHIRBaseUrl       ] = useState(replaceManifestUrl ? '' : job ? job.fhirBaseUrl  : '');
-    const [outputFormat      , setOutputFormat      ] = useState(replaceManifestUrl ? '' : job ? job.outputFormat : '');
-    const [fileRequestHeaders, setFileRequestHeaders] = useState(replaceManifestUrl ? '' : job?.fileRequestHeaders?.length ?
-        job.fileRequestHeaders.map(h => h.headerName && h.headerValue ? `${h.headerName}: ${h.headerValue}` : '').join('\n') : ''
-    );
+
+    const [manifestUrl , setManifestUrl ] = useState(replaceManifestUrl ? '' : job ? job.manifestUrl  : '');
+    const [fhirBaseUrl , setFHIRBaseUrl ] = useState(replaceManifestUrl ? '' : job ? job.fhirBaseUrl  : '');
+    const [outputFormat, setOutputFormat] = useState(replaceManifestUrl ? '' : job ? job.outputFormat : '');
+    const [headers     , setHeaders     ] = useState(replaceManifestUrl ? [] : job?.fileRequestHeaders || []);
 
     const title = replaceManifestUrl ?
         <><i className='bi bi-pencil-square me-2' />Replace Manifest</> :
@@ -60,7 +50,7 @@ export default function ManifestForm({
                 manifestUrl,
                 fhirBaseUrl: fhirBaseUrl || defaultBaseUrl,
                 outputFormat,
-                fileRequestHeaders: parseFileRequestHeaders(fileRequestHeaders)
+                fileRequestHeaders: headers
             });
         }}>
             <fieldset disabled={loading}>
@@ -155,16 +145,14 @@ export default function ManifestForm({
                         </div>
                         <div className="mb-3" style={{ breakInside: 'avoid' }}>
                             <label className="form-label text-primary-emphasis fw-semibold">File Request Headers</label>
-                            <textarea
-                                className="form-control lh-sm"
-                                rows={3}
-                                placeholder={'Key: Value\nKey: Value'}
-                                value={fileRequestHeaders}
-                                onChange={e=>setFileRequestHeaders(e.target.value)}
-                                name='fileRequestHeaders'
-                            />
+                            <HeadersGrid headers={headers} onChange={setHeaders} />
                             <div className="small mt-1 text-muted lh-sm opacity-75">
-                                HTTP headers that the Data Recipient should use when requesting a data file from the Data Sender
+                                HTTP headers that the Data Recipient should use
+                                when requesting a data file from the Data Provider.
+                                To use basic authentication set
+                                the <code>Authorization</code> header
+                                to <code>Basic &lt;secret&gt;</code> (the secret
+                                will be provided at runtime).
                             </div>
                         </div>
                     </div>

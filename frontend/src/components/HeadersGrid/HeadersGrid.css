@@ -1,0 +1,44 @@
+.header-grid {
+    display: grid;
+    grid-template-columns: 2fr 3fr auto;
+    gap: 1px 1px;
+    max-height: 50vh;
+    overflow-y: auto;
+    align-items: center;
+    justify-items: center;
+}
+
+.header-grid input {
+    border: 0;
+    border-radius: 0;
+    outline: none;
+    padding: 0.25rem 0.5rem;
+    box-shadow: 0 0 0 1px var(--bs-border-color) !important;
+}
+
+.header-grid .header-grid-add-row {
+    grid-column: span 3;
+    cursor: pointer;
+    color: var(--bs-primary);
+    text-align: center;
+    padding: 0.25rem 0;
+    font-size: small;
+}
+
+.header-grid .header-grid-delete-icon {
+    box-shadow: 0 0 0 1px var(--bs-border-color) !important;
+    cursor: pointer;
+    align-self: stretch;
+    justify-self: stretch;
+    align-items: center;
+    justify-items: center;
+    display: inline-flex;
+    text-align: center;
+    padding: 4px;
+    color: var(--bs-secondary);
+}
+
+.header-grid .header-grid-delete-icon:hover {
+    background-color: #F301;
+    color: var(--bs-danger);
+}
