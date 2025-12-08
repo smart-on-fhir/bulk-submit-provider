@@ -42,6 +42,11 @@ export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) =
               <i className="bi bi-github me-1" />GitHub Repository
             </a>
           </div>
+          <div className='small'>
+            <a href="https://bulk-submit-recipient.smarthealthit.org/" target="_blank" rel="noreferrer" className='text-decoration-none'>
+              Bulk Submit Recipient <i className="bi bi-box-arrow-up-right ms-1" />
+            </a>
+          </div>
         </div>
       </footer>
     </div>
