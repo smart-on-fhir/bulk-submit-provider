@@ -1,9 +1,129 @@
-import { useEffect, useState } from 'react';
-import ReactMarkdown           from 'react-markdown';
-import remarkGfm               from 'remark-gfm';
-import rehypeRaw               from 'rehype-raw';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useEffect, useState, useRef } from 'react';
+import ReactMarkdown                   from 'react-markdown';
+import remarkGfm                       from 'remark-gfm';
+import rehypeRaw                       from 'rehype-raw';
+import { Prism as SyntaxHighlighter }  from 'react-syntax-highlighter';
+import { oneDark }                     from 'react-syntax-highlighter/dist/esm/styles/prism';
+import mermaid                         from 'mermaid';
+
+
+// Helper to detect if dark mode is active
+const isDarkMode = () => {
+  return document.documentElement.getAttribute('data-bs-theme') === 'dark' ||
+         document.body.classList.contains('dark') ||
+         window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
+// Mermaid theme configurations
+const lightThemeVariables = {
+  primaryColor: '#4a90d9',
+  primaryTextColor: '#fff',
+  primaryBorderColor: '#2c5282',
+  lineColor: '#718096',
+  secondaryColor: '#edf2f7',
+  tertiaryColor: '#f7fafc',
+  background: '#ffffff',
+  mainBkg: '#ffffff',
+  // Sequence diagram
+  actorBkg: '#4a90d9',
+  actorTextColor: '#fff',
+  actorBorder: '#2c5282',
+  actorLineColor: '#718096',
+  signalColor: '#2d3748',
+  signalTextColor: '#2d3748',
+  noteBkgColor: '#fff9db',
+  noteTextColor: '#2d3748',
+  noteBorderColor: '#e9c46a',
+  // Box backgrounds for participant groups
+  labelBoxBkgColor: '#e2e8f0',
+  labelTextColor: '#2d3748',
+};
+
+const darkThemeVariables = {
+  primaryColor: '#4a90d9',
+  primaryTextColor: '#fff',
+  primaryBorderColor: '#63b3ed',
+  lineColor: '#a0aec0',
+  secondaryColor: '#2d3748',
+  tertiaryColor: '#1a202c',
+  background: '#1a202c',
+  mainBkg: '#1a202c',
+  // Sequence diagram
+  actorBkg: '#4a90d9',
+  actorTextColor: '#fff',
+  actorBorder: '#63b3ed',
+  actorLineColor: '#a0aec0',
+  signalColor: '#e2e8f0',
+  signalTextColor: '#e2e8f0',
+  noteBkgColor: '#2d3748',
+  noteTextColor: '#e2e8f0',
+  noteBorderColor: '#4a5568',
+  // Box backgrounds for participant groups
+  labelBoxBkgColor: '#2d3748',
+  labelTextColor: '#e2e8f0',
+};
+
+// Component to render Mermaid diagrams with theme support
+const MermaidDiagram = ({ chart }: { chart: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [svg, setSvg] = useState<string>('');
+  const [darkMode, setDarkMode] = useState<boolean>(isDarkMode());
+
+  // Listen for theme changes
+  useEffect(() => {
+    const checkTheme = () => {
+      setDarkMode(isDarkMode());
+    };
+
+    // Watch for Bootstrap theme attribute changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { 
+      attributes: true, 
+      attributeFilter: ['data-bs-theme', 'class'] 
+    });
+
+    // Also listen for system preference changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkTheme);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkTheme);
+    };
+  }, []);
+
+  // Re-render diagram when theme or chart changes
+  useEffect(() => {
+    const renderChart = async () => {
+      if (!containerRef.current) return;
+      try {
+        // Re-initialize mermaid with the current theme
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: 'base',
+          securityLevel: 'loose',
+          themeVariables: darkMode ? darkThemeVariables : lightThemeVariables,
+        });
+
+        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+        const { svg } = await mermaid.render(id, chart);
+        setSvg(svg);
+      } catch (err) {
+        console.error('Mermaid render error:', err);
+        setSvg(`<pre>Error rendering diagram: ${err}</pre>`);
+      }
+    };
+    renderChart();
+  }, [chart, darkMode]);
+
+  return (
+    <div 
+      ref={containerRef} 
+      className="mermaid-diagram my-3"
+      dangerouslySetInnerHTML={{ __html: svg }} 
+    />
+  );
+};
 
 const MarkdownEmbed = () => {
   const [markdown, setMarkdown] = useState('');
@@ -58,6 +178,15 @@ const MarkdownEmbed = () => {
           code: (props: any) => {
             const { inline, className, children, ...rest } = props;
             const match = /language-(\w+)/.exec(className || '');
+            const codeString = String(children).replace(/\n$/, '');
+
+            // Render Mermaid diagrams
+            if (!inline && match && match[1] === 'mermaid') {
+              // Strip YAML frontmatter from mermaid code (---...---)
+              const cleanedChart = codeString.replace(/^---[\s\S]*?---\s*/m, '').trim();
+              return <MermaidDiagram chart={cleanedChart} />;
+            }
+
             if (!inline && match) {
               return (
                 <SyntaxHighlighter
@@ -67,7 +196,7 @@ const MarkdownEmbed = () => {
                   PreTag="div"
                   {...rest}
                 >
-                  {String(children).replace(/\n$/, '')}
+                  {codeString}
                 </SyntaxHighlighter>
               );
             }
