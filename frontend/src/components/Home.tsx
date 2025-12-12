@@ -16,6 +16,11 @@ export default function Home() {
                         Start New Submission
                     </Link>
                 </div>
+                <div className="alert alert-warning">
+                    NOTE: This is a demo implementation of the Bulk Data Submit specification.
+                    It is not intended for production use. Any data is automatically deleted
+                    in 48 hours.
+                </div>
             </div>
         </div>
     );
