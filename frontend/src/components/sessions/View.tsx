@@ -540,7 +540,7 @@ function ErrorPreview({ entries }: { entries: App.ResultManifest['error'] }) {
     }
 
     return (
-        <ul className='m-0 ps-3 small' style={{ maxHeight: 200, overflowY: 'auto' }}>
+        <ul className='m-0 ps-3 small' style={{ maxHeight: 220, overflowY: 'auto' }}>
             { messages.map((msg, index) => <li key={index} style={{
                 whiteSpace: 'pre-wrap',
                 lineHeight: 'inherit',
