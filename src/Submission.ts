@@ -519,7 +519,7 @@ export default class Submission
         }
 
         if (process.env.NODE_ENV !== 'test') {
-            await this.kickoffStatusPolling();
+            this.kickoffStatusPolling();
         }
 
         return this;
