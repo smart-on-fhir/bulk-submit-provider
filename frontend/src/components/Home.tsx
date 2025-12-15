@@ -20,6 +20,7 @@ export default function Home() {
                     NOTE: This is a demo implementation of the Bulk Data Submit specification.
                     It is not intended for production use. Any data is automatically deleted
                     in 48 hours.
+                    <h5 className="mt-3">Please do not use PHI!</h5>
                 </div>
             </div>
         </div>
