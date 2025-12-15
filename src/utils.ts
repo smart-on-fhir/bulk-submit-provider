@@ -154,7 +154,7 @@ export async function sendRequest(url: string | URL | Request, options?: Request
 
 export function staticRequestLogger() {
     return (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
-        const submissionId = String(req.headers['x-bulk-submission-id']);
+        const submissionId = String(req.headers['x-bulk-submission-id'] || '').trim();
         if (submissionId) {
             const session = db.sessions.get(submissionId);
             if (session) {
