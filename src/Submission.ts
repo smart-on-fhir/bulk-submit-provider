@@ -428,7 +428,7 @@ export default class Submission
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/fhir+json'
             },
             body: JSON.stringify({
                 resourceType: 'Parameters',
