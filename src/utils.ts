@@ -1,3 +1,7 @@
+import { NextFunction, Request as ExpressRequest, Response as ExpressResponse } from "express";
+import db from "./db";
+
+
 export function formatDuration(ms: number): string {
     if (ms < 1000) return `${ms} ms`;
 
@@ -144,6 +148,52 @@ export async function sendRequest(url: string | URL | Request, options?: Request
     } catch (err) {
         out.error = getErrorMessage(err);
     }
-    
+
     return out;
+}
+
+export function staticRequestLogger() {
+    return (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
+        const submissionId = String(req.headers['x-bulk-submission-id']);
+        if (submissionId) {
+            const session = db.sessions.get(submissionId);
+            if (session) {
+                const originalEnd = res.end;
+                res.end = function (...args: any[]) {
+                    try {
+                      // Get file info if available
+                      let fileInfo = res.locals && res.locals._fileInfo;
+                      let fileMsg = '';
+                      if (fileInfo) {
+                        // Format size (e.g., 20KB)
+                        const size = fileInfo.size;
+                        let sizeStr = size < 1024 ? `${size}B` : size < 1024*1024 ? `${Math.round(size/1024)}KB` : `${(size/1024/1024).toFixed(1)}MB`;
+                        // Format extension (e.g., PDF)
+                        let ext = fileInfo.ext ? fileInfo.ext.replace(/^\./, '') : '';
+                        fileMsg = `${sizeStr}${ext ? ' ' + ext : ''} file `;
+                      }
+                      session.log.add(`Recipient downloading ${req.path}`, {
+                          request: {
+                              method : req.method,
+                              url    : req.originalUrl,
+                              headers: req.headers,
+                              body   : null
+                          },
+                          response: {
+                              headers   : res.getHeaders(),
+                              body      : `${fileMsg}omitted from log`,
+                              status    : res.statusCode,
+                              statusText: res.statusMessage || ''
+                          }
+                      });
+                      session.save();
+                    } catch {}
+                    return originalEnd.apply(this, args as any);
+                };
+            } else {
+                console.log(`No session found for submission ID: ${submissionId}`);
+            }
+        }
+        next();
+    };
 }

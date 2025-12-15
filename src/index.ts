@@ -16,7 +16,16 @@ if (NODE_ENV !== 'production') {
       tokenUrl: 'http://localhost:3333/token'
     });
     (defaultSubmission as any).id = 'example-submission';
-    defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/1`, fhirBaseUrl: BASE_URL });
+    defaultSubmission.addJob({
+      manifestUrl: `${BASE_URL}/api/manifests/1`,
+      fhirBaseUrl: BASE_URL,
+      fileRequestHeaders: [
+        {
+          headerName: 'x-bulk-submission-id',
+          headerValue: 'example-submission'
+        }
+      ]
+    });
     defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/2`, fhirBaseUrl: BASE_URL });
     defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/3`, fhirBaseUrl: BASE_URL });
     defaultSubmission.addJob({ manifestUrl: `${BASE_URL}/api/manifests/4`, fhirBaseUrl: BASE_URL });

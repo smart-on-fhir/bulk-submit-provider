@@ -157,10 +157,13 @@ export default function ManifestForm({
                             <div className="small mt-1 text-muted lh-sm opacity-75">
                                 HTTP headers that the Data Recipient should use
                                 when requesting a data file from the Data Provider.
-                                To use basic authentication set
+                                <li>To use basic authentication set
                                 the <code>Authorization</code> header
                                 to <code>Basic &lt;secret&gt;</code> (the secret
-                                will be provided at runtime).
+                                will be provided at runtime).</li>
+                                <li>To track download request
+                                    add <code>x-bulk-submission-id</code> with
+                                    value <code>{session.id}</code>.</li>
                             </div>
                         </div>
                     </div>

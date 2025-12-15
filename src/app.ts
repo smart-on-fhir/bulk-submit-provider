@@ -1,8 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
-import cors             from 'cors';
-import path             from 'path';
-import router           from './routes';
-import { BASIC_SECRET } from './config';
+import cors                    from 'cors';
+import path                    from 'path';
+import router                  from './routes';
+import { BASIC_SECRET }        from './config';
+import { staticRequestLogger } from './utils';
 
 
 /**
@@ -44,10 +45,16 @@ export default function createApp() {
 
     // Serve static files in /exports (with optional Basic Auth)
     const exportsDir = path.resolve(__dirname, '..', 'exports');
-    app.use('/exports', optionalBasicAuth, express.static(exportsDir, {
-        setHeaders(res, path, stat) {
-            if (stat.isFile() && path.endsWith('.ndjson')) {
+    app.use('/exports', optionalBasicAuth, staticRequestLogger(), express.static(exportsDir, {
+        setHeaders(res, filePath, stat) {
+            if (stat.isFile() && filePath.endsWith('.ndjson')) {
                 res.set('Content-Type', 'application/ndjson');
+            }
+            // Save file info for logging
+            if (stat.isFile()) {
+                const ext = require('path').extname(filePath);
+                if (!res.locals) res.locals = {};
+                res.locals._fileInfo = { size: stat.size, ext };
             }
         }
     }));

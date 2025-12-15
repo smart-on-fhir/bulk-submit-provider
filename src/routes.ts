@@ -1,10 +1,10 @@
-import { Router, Request, Response } from 'express';
-import cookieParser                  from 'cookie-parser';
-import path                          from 'path';
-import Submission                    from './Submission';
-import db                            from './db';
-import { getErrorMessage }           from './utils';
-import { createAuthenticator }       from './authenticator';
+import { Router, Request, Response }            from 'express';
+import cookieParser                             from 'cookie-parser';
+import path                                     from 'path';
+import Submission                               from './Submission';
+import db                                       from './db';
+import { getErrorMessage, staticRequestLogger } from './utils';
+import { createAuthenticator }                  from './authenticator';
 import {
     BASE_URL,
     PRIVATE_KEY,
@@ -365,7 +365,7 @@ router.post('/api/sessions/:id/submit-manifest', async (req: Request, res: Respo
 // Hosting endpoints -----------------------------------------------------------
 
 // Return an empty manifest (used to abort manifests)
-router.get('/api/manifests/empty', (req: Request, res: Response) => {    
+router.get('/api/manifests/empty', staticRequestLogger(), (req: Request, res: Response) => {    
     res.json({
         transactionTime: new Date().toISOString(),
         requiresAccessToken: false,
@@ -374,7 +374,7 @@ router.get('/api/manifests/empty', (req: Request, res: Response) => {
 });
 
 // Export manifests
-router.get('/api/manifests/:id', (req: Request, res: Response) => {
+router.get('/api/manifests/:id', staticRequestLogger(), (req: Request, res: Response) => {
 
     // The id is the name of a subfolder in /exports
     const { id } = req.params;

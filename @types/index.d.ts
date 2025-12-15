@@ -76,7 +76,7 @@ declare global {
             method : string;
             url    : string;
             headers: object;
-            body   : object
+            body   : object | null
         }
 
         interface JobResponse {
