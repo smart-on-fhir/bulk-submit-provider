@@ -61,12 +61,12 @@ describe('Submission.submitManifest', () => {
         await submission.submitManifest('http://example.org/manifest1');
 
         // Prevent the internal polling timer from firing after the test
-        // restores the original sendRequest implementation. The pool timer is
+        // restores the original sendRequest implementation. The poll timer is
         // a runtime property (TypeScript `private` only), so we access it via
         // `any` here.
-        if ((submission as any).poolTimer) {
-            clearTimeout((submission as any).poolTimer);
-            (submission as any).poolTimer = null;
+        if ((submission as any).pollTimer) {
+            clearTimeout((submission as any).pollTimer);
+            (submission as any).pollTimer = null;
         }
 
         // Verify that a call was made to $bulk-submit
@@ -116,9 +116,9 @@ describe('Submission.submitManifest', () => {
         await submission.submitManifest('http://example.org/manifest2');
 
         // Clear the polling timer so it doesn't call the restored sendRequest later.
-        if ((submission as any).poolTimer) {
-            clearTimeout((submission as any).poolTimer);
-            (submission as any).poolTimer = null;
+        if ((submission as any).pollTimer) {
+            clearTimeout((submission as any).pollTimer);
+            (submission as any).pollTimer = null;
         }
 
         const bulkCall = calls.find(c => c.url.endsWith('/$bulk-submit'));
@@ -148,9 +148,9 @@ describe('Submission.submitManifest', () => {
         await submission.submitManifest('http://example.org/manifest3');
 
         // Clear the polling timer so it doesn't call the restored sendRequest later.
-        if ((submission as any).poolTimer) {
-            clearTimeout((submission as any).poolTimer);
-            (submission as any).poolTimer = null;
+        if ((submission as any).pollTimer) {
+            clearTimeout((submission as any).pollTimer);
+            (submission as any).pollTimer = null;
         }
             
         const bulkCall = calls.find(c => c.url.endsWith('/$bulk-submit'));

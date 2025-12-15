@@ -143,21 +143,21 @@ export default function ViewSession() {
         setCompleting(false);
     };
 
-    const poolTimeout = React.useRef<NodeJS.Timeout | null>(null);
+    const pollTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         fetchSession();
     }, [id]);
 
     useEffect(() => {
-        const shouldPool = session && session.status === 'in-progress';
-        if (shouldPool) {
-            poolTimeout.current = setTimeout(() => fetchSession(), 5_000);
+        const shouldPoll = session && session.status === 'in-progress';
+        if (shouldPoll) {
+            pollTimeout.current = setTimeout(() => fetchSession(), 5_000);
         } else {
-            clearTimeout(poolTimeout.current!);
+            clearTimeout(pollTimeout.current!);
         }
         return () => {
-            clearTimeout(poolTimeout.current!);
+            clearTimeout(pollTimeout.current!);
         };
     }, [session]);
 

@@ -80,7 +80,7 @@ export default class Submission
      */
     private statusLocation: Promise<string> | null = null;
 
-    private poolTimer: NodeJS.Timeout | null = null;
+    private pollTimer: NodeJS.Timeout | null = null;
 
     private resultManifest: App.ResultManifest | null = null;
 
@@ -593,14 +593,14 @@ export default class Submission
     }
 
     async kickoffStatusPolling() {
-        if (!this.poolTimer) {
+        if (!this.pollTimer) {
             const statusUrl = await this.getStatusLocationCached();
             if (!statusUrl) {
                 console.error('No status URL available for polling');
                 return;
             }
 
-            this.poolTimer = setTimeout(() => this.checkStatus(statusUrl), 1_000);
+            this.pollTimer = setTimeout(() => this.checkStatus(statusUrl), 1_000);
         }
     }
 
@@ -617,8 +617,8 @@ export default class Submission
             res?.status === 202 ?
                 `Status: ${response?.headers['x-progress'] || this.status}. Next status check in 5 seconds...` :
                 res ?
-                    `Status: got unexpected response ${res?.status} ${res?.statusText}. Pooling will stop.` :
-                    `Status: got no response. Pooling will stop.`;
+                    `Status: got unexpected response ${res?.status} ${res?.statusText}. Polling will stop.` :
+                    `Status: got no response. Polling will stop.`;
 
         this.log.add(msg, {
             request : request as App.JobRequest,
@@ -632,7 +632,7 @@ export default class Submission
             if (progress && progress[1]) {
                 this.progress = Math.round(parseFloat(progress[1]));
             }
-            this.poolTimer = setTimeout(() => this.checkStatus(statusUrl), 5_000);
+            this.pollTimer = setTimeout(() => this.checkStatus(statusUrl), 5_000);
         }
 
         if (res?.status === 200) {
