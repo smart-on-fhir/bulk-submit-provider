@@ -41,7 +41,15 @@ export default function ManifestForm({
         { replaceManifestUrl ? 'Replace' : job ? 'Save' : 'Add' }
     </>;
 
-    const defaultBaseUrl = manifestUrl ? new URL(manifestUrl).origin : '';
+    let defaultBaseUrl = '';
+    if (manifestUrl) {
+        try {
+            defaultBaseUrl = new URL(manifestUrl).origin;
+        } catch {
+            console.warn('Invalid manifest URL');
+            defaultBaseUrl = '';
+        }
+    }
 
     return (
         <form onSubmit={(e) => {
