@@ -1,6 +1,7 @@
 import { Router, Request, Response }            from 'express';
 import cookieParser                             from 'cookie-parser';
 import path                                     from 'path';
+import { debuglog }                             from "util";
 import Submission                               from './Submission';
 import db                                       from './db';
 import { getErrorMessage, staticRequestLogger } from './utils';
@@ -16,6 +17,9 @@ import {
     readFileSync,
     statSync
 } from 'fs';
+
+
+const debugSubmission = debuglog("app:bulkSubmit");
 
 
 const router = Router();
@@ -42,6 +46,7 @@ router.use((req, res, next) => {
 
 // Get all Submissions
 router.get('/api/sessions', (req: Request, res: Response) => {
+    debugSubmission(`User ${res.locals.sessionId} requested sessions list`);
     const sessions = Array.from(db.sessions.values());
     res.json(sessions.filter(session => {
         const sessionId = res.locals.sessionId;
@@ -52,6 +57,7 @@ router.get('/api/sessions', (req: Request, res: Response) => {
 
 // Create new Submission
 router.post('/api/sessions', (req: Request, res: Response) => {
+    debugSubmission(`User ${res.locals.sessionId} creating new submission`);
     try {
         const { destinationBaseUrl, name, submitter, id, clientId, authType, tokenUrl } = req.body;
         if (!destinationBaseUrl) {
@@ -76,6 +82,7 @@ router.post('/api/sessions', (req: Request, res: Response) => {
 
 // Update Submission by ID
 router.put('/api/sessions/:id', (req: Request, res: Response) => {
+    debugSubmission(`User ${res.locals.sessionId} updating submission ${req.params.id}`);
     try {
         const { id } = req.params;
         const { destinationBaseUrl, submitter, name, id: newId, clientId, authType, tokenUrl } = req.body;
@@ -130,6 +137,7 @@ router.put('/api/sessions/:id', (req: Request, res: Response) => {
 
 // Get Submission by ID
 router.get('/api/sessions/:id', (req: Request, res: Response) => {
+    debugSubmission(`User ${res.locals.sessionId} retrieving submission ${req.params.id}`);
     const { id } = req.params;
     const session = db.sessions.get(id);
     if (!session) {
@@ -143,6 +151,7 @@ router.get('/api/sessions/:id', (req: Request, res: Response) => {
 
 // Delete Submission by ID
 router.delete('/api/sessions/:id', (req: Request, res: Response) => {
+    debugSubmission(`User ${res.locals.sessionId} deleting submission ${req.params.id}`);
     const { id } = req.params;
     const session = db.sessions.get(id);
     if (!session) {
@@ -157,6 +166,7 @@ router.delete('/api/sessions/:id', (req: Request, res: Response) => {
 
 // Complete Submission by ID
 router.post('/api/sessions/:id/complete', async (req: Request, res: Response) => {
+    debugSubmission(`User ${res.locals.sessionId} marking submission ${req.params.id} as complete`);
     const { id } = req.params;
 
     const session = db.sessions.get(id);
@@ -180,6 +190,7 @@ router.post('/api/sessions/:id/complete', async (req: Request, res: Response) =>
 
 // Abort Submission by ID
 router.post('/api/sessions/:id/abort', async (req: Request, res: Response) => {
+    debugSubmission(`User ${res.locals.sessionId} aborting submission ${req.params.id}`);
     const { id } = req.params;
 
     const session = db.sessions.get(id);
@@ -219,6 +230,7 @@ router.post('/api/sessions/:id/manifests', (req: Request, res: Response) => {
         return;
     }
 
+    debugSubmission(`User ${res.locals.sessionId} adding manifest to submission ${req.params.id}`);
     session.addJob({ manifestUrl, fhirBaseUrl, outputFormat, fileRequestHeaders });
     session.save();
     res.json(session);
@@ -248,6 +260,9 @@ router.put('/api/sessions/:id/manifests/:index', (req: Request, res: Response) =
     if (!manifest) {
         return res.status(404).json({ error: 'Manifest not found' });
     }
+
+    debugSubmission(`User ${res.locals.sessionId} updating manifest ${index} in submission ${req.params.id}`);
+
     if (manifestUrl)        manifest.manifestUrl        = manifestUrl;
     if (fhirBaseUrl)        manifest.fhirBaseUrl        = fhirBaseUrl;
     if (outputFormat)       manifest.outputFormat       = outputFormat;
@@ -268,6 +283,8 @@ router.delete('/api/sessions/:id/manifests/:index', (req: Request, res: Response
     if (!checkSubmissionOwnership(session, res)) {
         return;
     }
+
+    debugSubmission(`User ${res.locals.sessionId} removing manifest ${index} from submission ${req.params.id}`);
 
     session.removeManifestAt(+index);
     session.save();
@@ -291,6 +308,8 @@ router.post('/api/sessions/:id/manifests/:index/replace', async (req: Request, r
     if (!checkSubmissionOwnership(session, res)) {
         return;
     }
+
+    debugSubmission(`User ${res.locals.sessionId} replacing manifest ${index} in submission ${req.params.id}`);
 
     try {
         await session.replaceManifestAt(+index, {
@@ -322,6 +341,8 @@ router.post('/api/sessions/:id/manifests/:index/abort', async (req: Request, res
         return;
     }
 
+    debugSubmission(`User ${res.locals.sessionId} aborting manifest ${index} in submission ${req.params.id}`);
+
     try {
         await session.abortManifestAt(+index);
         session.save();
@@ -349,6 +370,8 @@ router.post('/api/sessions/:id/submit-manifest', async (req: Request, res: Respo
     if (!checkSubmissionOwnership(session, res)) {
         return;
     }
+
+    debugSubmission(`User ${res.locals.sessionId} submitting manifest ${manifestUrl} in submission ${req.params.id}`);
     
     try {
         await session.submitManifest(manifestUrl);
@@ -365,7 +388,8 @@ router.post('/api/sessions/:id/submit-manifest', async (req: Request, res: Respo
 // Hosting endpoints -----------------------------------------------------------
 
 // Return an empty manifest (used to abort manifests)
-router.get('/api/manifests/empty', staticRequestLogger(), (req: Request, res: Response) => {    
+router.get('/api/manifests/empty', staticRequestLogger(), (req: Request, res: Response) => {
+    debugSubmission(`Serving empty manifest`);
     res.json({
         transactionTime: new Date().toISOString(),
         requiresAccessToken: false,
@@ -375,6 +399,8 @@ router.get('/api/manifests/empty', staticRequestLogger(), (req: Request, res: Re
 
 // Export manifests
 router.get('/api/manifests/:id', staticRequestLogger(), (req: Request, res: Response) => {
+
+    debugSubmission(`Serving manifest for export ${req.params.id}`);
 
     // The id is the name of a subfolder in /exports
     const { id } = req.params;
@@ -428,6 +454,8 @@ router.get('/keys', (req, res) => {
 
 router.post('/auth/verify', async (req, res) => {
     const { client_id, token_url } = req.body;
+
+    debugSubmission(`User ${res.locals.sessionId} requesting token for client_id ${client_id} at ${token_url}`);
 
     if (!client_id) {
         return res.status(400).json({ error: 'Missing client_id parameter' });

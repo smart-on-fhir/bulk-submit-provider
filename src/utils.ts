@@ -1,5 +1,9 @@
 import { NextFunction, Request as ExpressRequest, Response as ExpressResponse } from "express";
 import db from "./db";
+import { debuglog } from "util";
+
+
+const debugSubmission = debuglog("app:bulkSubmit");
 
 
 export function formatDuration(ms: number): string {
@@ -149,11 +153,14 @@ export async function sendRequest(url: string | URL | Request, options?: Request
         out.error = getErrorMessage(err);
     }
 
+    debugSubmission(`Request ${out.request?.method || 'GET'} ${url} completed with status ${out.response?.status} ${out.response?.statusText || ''}`);
+
     return out;
 }
 
 export function staticRequestLogger() {
     return (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
+        debugSubmission(`Static file request: ${req.method} ${req.originalUrl}`);
         const submissionId = String(req.headers['x-bulk-submission-id'] || '').trim();
         if (submissionId) {
             const session = db.sessions.get(submissionId);
