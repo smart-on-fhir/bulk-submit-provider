@@ -65,13 +65,13 @@ export default class LogEntry {
         if (this.request?.url !== other.request?.url) {
             return false;
         }
-        if (this.request?.body !== other.request?.body) {
-            return false;
-        }
         if (this.response?.status !== other.response?.status) {
             return false;
         }
-        if (this.response?.body !== other.response?.body) {
+        if (JSON.stringify(this.request?.body) !== JSON.stringify(other.request?.body)) {
+            return false;
+        }
+        if (JSON.stringify(this.response?.body) !== JSON.stringify(other.response?.body)) {
             return false;
         }
         return true;
