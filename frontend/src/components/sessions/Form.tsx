@@ -24,7 +24,7 @@ export default function SubmissionForm({ loading, value, onSubmit }: {
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         onSubmit({
-            destinationBaseUrl,
+            destinationBaseUrl: destinationBaseUrl.replace(/\/+$/,''),
             name,
             submitter: JSON.parse(submitter),
             id       : id || undefined,

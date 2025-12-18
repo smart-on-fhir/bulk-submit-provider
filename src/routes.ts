@@ -64,7 +64,7 @@ router.post('/api/sessions', (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Missing destinationBaseUrl' });
         }
         const session = new Submission({
-            destinationBaseUrl,
+            destinationBaseUrl: destinationBaseUrl.replace(/\/+$/,''),
             name,
             submitter,
             owner_id: res.locals.sessionId,
