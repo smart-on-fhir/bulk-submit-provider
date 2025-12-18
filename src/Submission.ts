@@ -427,7 +427,7 @@ export default class Submission
             `${this.destinationBaseUrl}/$bulk-submit`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/fhir+json',
                 'Accept': 'application/fhir+json'
             },
             body: JSON.stringify({
@@ -539,7 +539,7 @@ export default class Submission
         const { error, request, response } = await this.sendRequest(`${this.destinationBaseUrl}/$bulk-submit-status`, {
             method : 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/fhir+json',
                 'Accept'      : 'application/fhir+json',
                 'Prefer'      : 'respond-async',
             },
@@ -610,7 +610,11 @@ export default class Submission
             return this;
         }
 
-        const { res, response, request, error } = await this.sendRequest(statusUrl)
+        const { res, response, request, error } = await this.sendRequest(statusUrl, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
 
         const msg = res?.status === 200 ?
             `Status: got ${res?.status} ${res?.statusText}. Submission is now complete!` :
