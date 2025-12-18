@@ -254,13 +254,13 @@ export default function ViewSession() {
                             }
                         }}>Delete</button>
                         <button
-                            className='btn btn-sm btn-outline-secondary px-3 d-block w-100 mt-2'
+                            className='btn btn-sm btn-outline-danger px-3 d-block w-100 mt-2'
                             type="button"
                             disabled={completed || ['aborted', 'complete', 'failed', 'not-started'].includes(session.status)}
                             onClick={abortSubmission}
                         >Abort</button>
                         <button
-                            className='btn btn-sm btn-outline-secondary px-3 d-block w-100 mt-2'
+                            className='btn btn-sm btn-outline-success px-3 d-block w-100 mt-2'
                             type="button"
                             onClick={completeSubmission}
                             disabled={completing || completed || ['complete', 'failed', 'not-started', 'aborted'].includes(session.status)}
@@ -271,6 +271,16 @@ export default function ViewSession() {
                     </div>
                 </div>
             </div>
+
+
+            { session.status === 'in-progress' && (
+                <div className='mt-5 text-center text-danger'>
+                    <div >
+                        <i className='bi bi-info-circle me-2'/>
+                        Next step: submit more manifests or <b>complete</b> or <b>abort</b> this submission
+                    </div>
+                </div>
+            )}
 
 
             { !session.manifests || session.manifests.length === 0 ? (
