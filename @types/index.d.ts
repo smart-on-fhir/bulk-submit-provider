@@ -3,17 +3,19 @@ import { Identifier } from "fhir/r4";
 declare global {
     namespace App {
 
-        type SubmissionStatusCode = "in-progress" | "complete" | "aborted";
+        type SubmissionStatusCode = "in-progress" | "completed" | "stopped";
 
         /**
-         * System of http://hl7.org/fhir/uv/bulkdata/ValueSet/submission-status,
-         * code of in-progress (default if parameter is omitted), complete or
-         * aborted. Once a request has been submitted with a submissionStatus of
-         * aborted or complete, no additional requests may be submitted for that
-         * submitter and submissionId combination.
+         * System of http://hl7.org/fhir/event-status, code of in-progress
+         * (default if parameter is omitted), completed or stopped. Values are
+         * drawn from the Submission Status Value Set, which constrains the
+         * http://hl7.org/fhir/event-status code system. Once a request has been
+         * submitted with a submissionStatus of stopped or completed, no
+         * additional requests may be submitted for that submitter and
+         * submissionId combination.
          */
         interface SubmissionStatusCoding {
-            system: "http://hl7.org/fhir/uv/bulkdata/ValueSet/submission-status",
+            system: "http://hl7.org/fhir/event-status",
             code  : SubmissionStatusCode
         }
 

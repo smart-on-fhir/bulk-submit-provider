@@ -7,9 +7,9 @@ import { createAuthenticator }             from './authenticator';
 import {
     BASE_URL,
     BASIC_SECRET,
-    CODING_ABORTED,
-    CODING_COMPLETE,
+    CODING_COMPLETED,
     CODING_IN_PROGRESS,
+    CODING_STOPPED,
     PRIVATE_KEY
 } from './config';
 
@@ -453,14 +453,14 @@ export default class Submission
     async complete() {
         this.log.add(`Marking bulk submission as complete...`);
         return await this.bulkSubmitRequest([
-            { name: 'submissionStatus', valueCoding: CODING_COMPLETE }
+            { name: 'submissionStatus', valueCoding: CODING_COMPLETED }
         ]);
     }
 
     async abort() {
         this.log.add(`Marking bulk submission as aborted...`);
         const result = await this.bulkSubmitRequest([
-            { name: 'submissionStatus', valueCoding: CODING_ABORTED }
+            { name: 'submissionStatus', valueCoding: CODING_STOPPED }
         ]);
         this.aborted = true;
         this.manifests.forEach(m => m.status = 'not-started');
