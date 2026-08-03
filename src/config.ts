@@ -23,18 +23,18 @@ export const SUBMISSION_LIFETIME_HOURS = parseInt(process.env.SUBMISSION_LIFETIM
 
 
 export const CODING_IN_PROGRESS: App.SubmissionStatusCoding = {
-    system: 'http://hl7.org/fhir/uv/bulkdata/ValueSet/submission-status',
+    system: 'http://hl7.org/fhir/event-status',
     code  : 'in-progress'
 };
 
-export const CODING_COMPLETE: App.SubmissionStatusCoding = {
-    system: 'http://hl7.org/fhir/uv/bulkdata/ValueSet/submission-status',
-    code  : 'complete'
+export const CODING_COMPLETED: App.SubmissionStatusCoding = {
+    system: 'http://hl7.org/fhir/event-status',
+    code  : 'completed'
 };
 
-export const CODING_ABORTED: App.SubmissionStatusCoding = {
-    system: 'http://hl7.org/fhir/uv/bulkdata/ValueSet/submission-status',
-    code  : 'aborted'
+export const CODING_STOPPED: App.SubmissionStatusCoding = {
+    system: 'http://hl7.org/fhir/event-status',
+    code  : 'stopped'
 };
 
 if (!process.env.PUBLIC_KEY || !process.env.PRIVATE_KEY) {

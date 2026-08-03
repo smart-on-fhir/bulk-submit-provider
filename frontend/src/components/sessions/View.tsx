@@ -307,7 +307,11 @@ export default function ViewSession() {
                     <table className="table table-hover m-0 table-layout-fixed align-middle">
                         <tbody>
                             {session.manifests.map((job, index) => {
-                                const errorEntries = session.result?.manifest?.error?.filter(e => {
+                                // `outcome` is the current spec name; `error` was
+                                // used in earlier drafts. Accept either.
+                                const outcomeEntries = session.result?.manifest?.outcome
+                                    ?? session.result?.manifest?.error;
+                                const errorEntries = outcomeEntries?.filter(e => {
                                     return e.extension?.manifestUrl === job.manifestUrl;
                                 });
                                 return (
@@ -463,7 +467,7 @@ export default function ViewSession() {
     );
 }
 
-function ManifestReport({ entries }: { entries: App.ResultManifest['error'] }) {
+function ManifestReport({ entries }: { entries: App.OutcomeEntry[] }) {
 
     const hasSuccessCount = entries.some(e => e.extension && e.extension.countSeverity?.success);
     const hasErrorCount   = entries.some(e => e.extension && e.extension.countSeverity?.error);
@@ -516,7 +520,7 @@ function ManifestReport({ entries }: { entries: App.ResultManifest['error'] }) {
     );
 }
 
-function ErrorPreview({ entries }: { entries: App.ResultManifest['error'] }) {
+function ErrorPreview({ entries }: { entries: App.OutcomeEntry[] }) {
 
     const [messages, setMessages] = useState<string[]>([]);
 

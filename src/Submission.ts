@@ -7,9 +7,9 @@ import { createAuthenticator }             from './authenticator';
 import {
     BASE_URL,
     BASIC_SECRET,
-    CODING_ABORTED,
-    CODING_COMPLETE,
+    CODING_COMPLETED,
     CODING_IN_PROGRESS,
+    CODING_STOPPED,
     PRIVATE_KEY
 } from './config';
 
@@ -225,7 +225,11 @@ export default class Submission
             startedAt  : this.startedAt,
             completedAt: this.completedAt,
             duration   : formatDuration(this.completedAt!.getTime() - this.startedAt!.getTime()),
-            totalErrors: this.resultManifest!.error.reduce((acc: number, entry: any) => acc + (entry.extension?.countSeverity?.error || 0), 0),
+            // The status manifest's OperationOutcome array is `outcome`. It was
+            // called `error` in earlier drafts of the Bulk Data Submit spec, so
+            // fall back to that for servers still emitting the old name.
+            totalErrors: (this.resultManifest!.outcome ?? this.resultManifest!.error ?? [])
+                .reduce((acc: number, entry: any) => acc + (entry.extension?.countSeverity?.error || 0), 0),
             manifest   : this.resultManifest
         };
     }
@@ -453,14 +457,14 @@ export default class Submission
     async complete() {
         this.log.add(`Marking bulk submission as complete...`);
         return await this.bulkSubmitRequest([
-            { name: 'submissionStatus', valueCoding: CODING_COMPLETE }
+            { name: 'submissionStatus', valueCoding: CODING_COMPLETED }
         ]);
     }
 
     async abort() {
         this.log.add(`Marking bulk submission as aborted...`);
         const result = await this.bulkSubmitRequest([
-            { name: 'submissionStatus', valueCoding: CODING_ABORTED }
+            { name: 'submissionStatus', valueCoding: CODING_STOPPED }
         ]);
         this.aborted = true;
         this.manifests.forEach(m => m.status = 'not-started');

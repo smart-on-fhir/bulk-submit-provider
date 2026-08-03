@@ -3,17 +3,19 @@ import { Identifier } from "fhir/r4";
 declare global {
     namespace App {
 
-        type SubmissionStatusCode = "in-progress" | "complete" | "aborted";
+        type SubmissionStatusCode = "in-progress" | "completed" | "stopped";
 
         /**
-         * System of http://hl7.org/fhir/uv/bulkdata/ValueSet/submission-status,
-         * code of in-progress (default if parameter is omitted), complete or
-         * aborted. Once a request has been submitted with a submissionStatus of
-         * aborted or complete, no additional requests may be submitted for that
-         * submitter and submissionId combination.
+         * System of http://hl7.org/fhir/event-status, code of in-progress
+         * (default if parameter is omitted), completed or stopped. Values are
+         * drawn from the Submission Status Value Set, which constrains the
+         * http://hl7.org/fhir/event-status code system. Once a request has been
+         * submitted with a submissionStatus of stopped or completed, no
+         * additional requests may be submitted for that submitter and
+         * submissionId combination.
          */
         interface SubmissionStatusCoding {
-            system: "http://hl7.org/fhir/uv/bulkdata/ValueSet/submission-status",
+            system: "http://hl7.org/fhir/event-status",
             code  : SubmissionStatusCode
         }
 
@@ -86,25 +88,41 @@ declare global {
             statusText: string;
         }
 
+        interface OutcomeEntry {
+            type?: string
+            url ?: string
+            extension?: {
+                manifestUrl?: string
+                countSeverity?: {
+                    success?: number
+                    error?: number
+                }
+            }
+        }
+
         interface ResultManifest {
-            extension: {
+            // Servers on the current spec emit `submissionId` at the top level;
+            // earlier drafts nested it under `extension`.
+            submissionId?: string
+            extension?: {
                 submissionId: string
             },
             transactionTime: string
-            request: string
+            /** Not part of the status manifest in the current spec. */
+            request?: string
             requiresAccessToken: boolean
+            /** Canonical URL of the logical model. */
+            manifestType?: string
+            outputFormat?: string
+            outputOrganizedBy?: string
+            outputOrganizedByDetail?: string
             output?: any[]
-            error: {
-                type?: string
-                url ?: string
-                extension?: {
-                    manifestUrl?: string
-                    countSeverity?: {
-                        success?: number
-                        error?: number
-                    }
-                }
-            }[]
+            deleted?: any[]
+            link?: any[]
+            /** OperationOutcome entries. Current spec name. */
+            outcome?: OutcomeEntry[]
+            /** Pre-rename name for `outcome`, kept for older servers. */
+            error?: OutcomeEntry[]
             [key: string]: any;
         }
 
