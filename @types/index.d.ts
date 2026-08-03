@@ -88,25 +88,41 @@ declare global {
             statusText: string;
         }
 
+        interface OutcomeEntry {
+            type?: string
+            url ?: string
+            extension?: {
+                manifestUrl?: string
+                countSeverity?: {
+                    success?: number
+                    error?: number
+                }
+            }
+        }
+
         interface ResultManifest {
-            extension: {
+            // Servers on the current spec emit `submissionId` at the top level;
+            // earlier drafts nested it under `extension`.
+            submissionId?: string
+            extension?: {
                 submissionId: string
             },
             transactionTime: string
-            request: string
+            /** Not part of the status manifest in the current spec. */
+            request?: string
             requiresAccessToken: boolean
+            /** Canonical URL of the logical model. */
+            manifestType?: string
+            outputFormat?: string
+            outputOrganizedBy?: string
+            outputOrganizedByDetail?: string
             output?: any[]
-            error: {
-                type?: string
-                url ?: string
-                extension?: {
-                    manifestUrl?: string
-                    countSeverity?: {
-                        success?: number
-                        error?: number
-                    }
-                }
-            }[]
+            deleted?: any[]
+            link?: any[]
+            /** OperationOutcome entries. Current spec name. */
+            outcome?: OutcomeEntry[]
+            /** Pre-rename name for `outcome`, kept for older servers. */
+            error?: OutcomeEntry[]
             [key: string]: any;
         }
 

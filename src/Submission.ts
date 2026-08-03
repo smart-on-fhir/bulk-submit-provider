@@ -225,7 +225,11 @@ export default class Submission
             startedAt  : this.startedAt,
             completedAt: this.completedAt,
             duration   : formatDuration(this.completedAt!.getTime() - this.startedAt!.getTime()),
-            totalErrors: this.resultManifest!.error.reduce((acc: number, entry: any) => acc + (entry.extension?.countSeverity?.error || 0), 0),
+            // The status manifest's OperationOutcome array is `outcome`. It was
+            // called `error` in earlier drafts of the Bulk Data Submit spec, so
+            // fall back to that for servers still emitting the old name.
+            totalErrors: (this.resultManifest!.outcome ?? this.resultManifest!.error ?? [])
+                .reduce((acc: number, entry: any) => acc + (entry.extension?.countSeverity?.error || 0), 0),
             manifest   : this.resultManifest
         };
     }
